@@ -8,7 +8,7 @@ def density_field_gadget(snapshot_fname, ptypes, dims, MAS='CIC',
                          do_RSD=False, axis=0, verbose=True): 
 
     start = time.time()
-    if verbose:  print '\nComputing density field of particles',ptypes
+    if verbose:  print('\nComputing density field of particles',ptypes)
 
     # declare the array hosting the density field
     density = np.zeros((dims, dims, dims), dtype=np.float32)
@@ -32,7 +32,7 @@ def density_field_gadget(snapshot_fname, ptypes, dims, MAS='CIC',
 
     # do a loop over all files
     num = 0.0
-    for i in xrange(filenum):
+    for i in range(filenum):
 
         # find the name of the sub-snapshot
         if filenum==1:       snapshot = snapshot_fname
@@ -76,9 +76,9 @@ def density_field_gadget(snapshot_fname, ptypes, dims, MAS='CIC',
                 num += np.sum(mass, dtype=np.float64)
 
     if verbose:
-        print '%.8e should be equal to\n%.8e'\
-            %(np.sum(density, dtype=np.float64), num)
-        print 'Time taken = %.2f seconds'%(time.time()-start)
+        print('%.8e should be equal to\n%.8e'\
+            %(np.sum(density, dtype=np.float64), num))
+        print('Time taken = %.2f seconds'%(time.time()-start))
 
     return np.asarray(density)
 
