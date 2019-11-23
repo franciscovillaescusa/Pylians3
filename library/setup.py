@@ -46,8 +46,8 @@ ext_modules = [
     #          ["sorting_library/sorting_library.pyx"],
     #          extra_compile_args=['-O3','-ffast-math','-march=native']),
 
-    #Extension("HI_library.HI_library",
-    #          ["HI_library/HI_library.pyx"]),
+    Extension("HI_library.HI_library",
+              ["HI_library/HI_library.pyx"]),
 
     Extension("HI_clusters_library.HI_clusters_library", 
               ["HI_clusters_library/HI_clusters_library.pyx"]),
