@@ -283,7 +283,7 @@ class hod_fast:
 
         self.Mmin=Mmin
         if verbose:
-            print('\nMmin = %.3e'%Mmin; )
+            print('\nMmin = %.3e'%Mmin);
             print('average number of galaxies =',total_galaxies)
             print('average galaxy density = %.3e galaxies/(Mpc/h)^3'\
                 %mean_density)
