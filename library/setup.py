@@ -19,8 +19,8 @@ ext_modules = [
     #Extension("Pk_library.bispectrum_library",
     #    ["Pk_library/bispectrum_library.pyx"]),
 
-    #Extension("redshift_space_library.redshift_space_library", 
-    #          ["redshift_space_library/redshift_space_library.pyx"]),
+    Extension("redshift_space_library.redshift_space_library", 
+              ["redshift_space_library/redshift_space_library.pyx"]),
 
     #Extension("smoothing_library.smoothing_library",
     #          ["smoothing_library/smoothing_library.pyx"],
