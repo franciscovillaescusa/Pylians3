@@ -148,7 +148,7 @@ def Rahmati(snapshot_fname, TREECOOL_file, T_block=True, Gamma_UVB=None,
         elif correct_H2 == 'THINGS':   R_surf = (P/1.7e4)**0.8
         #R_surf[IDs]=1.0/(1.0+(35.0*(0.1/nH/0.76)**(gamma))**0.92)
         else:
-            print('bad choice of correct_H2!!!'; sys.exit())
+            print('bad choice of correct_H2!!!'); sys.exit()
 
         #compute the corrected HI mass taking into account the H2
         nH0[indexes]=nH0[indexes]/(1.0+R_surf[indexes]); del indexes,R_surf
