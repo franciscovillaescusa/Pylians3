@@ -1,0 +1,7 @@
+The main changes to port Pylians to Pylians3 have been:
+
+1) Change xrange() by range()
+2) Change print "test" by print("test")
+3) Change 5/2=2 (python2) to 5//2=2 (python3)
+4) Check the mix usage of tabs and spaces (done with brackets)
+5) Change depreciated functions, e.g. time.clock() by time.time()

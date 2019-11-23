@@ -68,7 +68,7 @@ cpdef void MA(pos, number, BoxSize, MAS='CIC', W=None, verbose=False,
     if verbose:
         if W is None:  print('\nUsing %s mass assignment scheme'%MAS)
         else:          print('\nUsing %s mass assignment scheme with weights'%MAS)
-    start = time.clock()
+    start = time.time()
     if coord==3: 
         if   MAS=='NGP' and W is None:  NGP(pos,number,BoxSize)
         elif MAS=='CIC' and W is None:  CIC(pos,number,BoxSize)
@@ -109,7 +109,7 @@ cpdef void MA(pos, number, BoxSize, MAS='CIC', W=None, verbose=False,
             print('option not valid!!!');  sys.exit()
         number = number2[:,:,0]
     if verbose:
-        print('Time taken = %.3f seconds\n'%(time.clock()-start))
+        print('Time taken = %.3f seconds\n'%(time.time()-start))
     
 
 ################################################################################
