@@ -49,8 +49,8 @@ ext_modules = [
     #Extension("HI_library.HI_library",
     #          ["HI_library/HI_library.pyx"]),
 
-    #Extension("HI_clusters_library.HI_clusters_library", 
-    #          ["HI_clusters_library/HI_clusters_library.pyx"]),
+    Extension("HI_clusters_library.HI_clusters_library", 
+              ["HI_clusters_library/HI_clusters_library.pyx"]),
 
 
 ]
