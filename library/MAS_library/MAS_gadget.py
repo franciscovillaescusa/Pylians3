@@ -66,7 +66,7 @@ def density_field_gadget(snapshot_fname, ptypes, dims, MAS='CIC',
                     num += pos.shape[0]
                 else:
                     mass = np.ones(npart[ptype], dtype=np.float32)*Masses[ptype]
-                        MASL.MA(pos, density, BoxSize, MAS, W=mass)
+                    MASL.MA(pos, density, BoxSize, MAS, W=mass)
                     num += np.sum(mass, dtype=np.float64)
             else:
                 mass = readgadget.read_field(snapshot, "MASS", ptype)*1e10
