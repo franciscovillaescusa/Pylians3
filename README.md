@@ -1,6 +1,6 @@
 # Pylians3
 
-Pylians stands for **Py**thon **li**braries for the **a**nalysis of **n**umerical **s**imulations. They are a set of python libraries, written in python, cython and C, whose purposes is to facilitate the analysis of numerical simulations (both N-body and hydro). Pylians3 evolved from Pylians to support python3. Among other things, they can be used to:
+Pylians stands for **Py**thon **li**braries for the **a**nalysis of **n**umerical **s**imulations. They are a set of python libraries, written in python, cython and C, whose purposes is to facilitate the analysis of numerical simulations (both N-body and hydro). Pylians3 evolved from [Pylians](https://github.com/franciscovillaescusa/Pylians) to support python3. Among other things, they can be used to:
 
 - Compute density fields
 - Compute power spectra
@@ -48,6 +48,12 @@ python setup.py install
 ```
 
 We recommend using the first method since you will know exactly where the libraries are. If you want to uninstall Pylians3 and have used the first option, just delete build folder.
+
+To verify that the installation was successful, do
+```python
+python Tests/import_libraries.py
+```
+If no output is produced, everything went fine.
 
 ## Usage
 
