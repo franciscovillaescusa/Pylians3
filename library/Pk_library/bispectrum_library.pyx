@@ -229,9 +229,8 @@ def Bispectrum_theory(k,Pk,k1,k2):
         B[i] = 2.0*Pk1*Pk2*F2_12 + 2.0*Pk1*Pk3*F2_13 + 2.0*Pk2*Pk3*F2_23
         print(F2_12, F2_13, F2_23)
         print(k1,k2,k3)
-        print((Pk1,Pk2,Pk3)
-        print([i])
-        print('')
+        print(Pk1,Pk2,Pk3)
+        print(i,'\n')
 
     return thetas,B
         
