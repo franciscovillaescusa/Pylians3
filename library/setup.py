@@ -33,11 +33,11 @@ ext_modules = [
     #    extra_compile_args = ['-O3','-ffast-math','-march=native','-fopenmp'],
     #    extra_link_args=['-fopenmp'], libraries=['m']),
 
-    #Extension("integration_library.integration_library",
-    #          ["integration_library/integration_library.pyx",
-    #           "integration_library/integration.c",
-    #           "integration_library/runge_kutta.c"],
-    #          extra_compile_args=["-O3","-ffast-math","-march=native"]),
+    Extension("integration_library.integration_library",
+              ["integration_library/integration_library.pyx",
+               "integration_library/integration.c",
+               "integration_library/runge_kutta.c"],
+              extra_compile_args=["-O3","-ffast-math","-march=native"]),
 
     #Extension("density_field_library.density_field_library", 
     #          ["density_field_library/density_field_library.pyx"]),
