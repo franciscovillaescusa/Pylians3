@@ -39,8 +39,8 @@ ext_modules = [
                "integration_library/runge_kutta.c"],
               extra_compile_args=["-O3","-ffast-math","-march=native"]),
 
-    #Extension("density_field_library.density_field_library", 
-    #          ["density_field_library/density_field_library.pyx"]),
+    Extension("density_field_library.density_field_library", 
+              ["density_field_library/density_field_library.pyx"]),
 
     #Extension("sorting_library.sorting_library", 
     #          ["sorting_library/sorting_library.pyx"],
