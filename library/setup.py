@@ -22,10 +22,10 @@ ext_modules = [
     Extension("redshift_space_library.redshift_space_library", 
               ["redshift_space_library/redshift_space_library.pyx"]),
 
-    #Extension("smoothing_library.smoothing_library",
-    #          ["smoothing_library/smoothing_library.pyx"],
-    #    extra_compile_args = ['-O3','-ffast-math','-march=native','-fopenmp'],
-    #    extra_link_args=['-fopenmp'], libraries=['m']),
+    Extension("smoothing_library.smoothing_library",
+              ["smoothing_library/smoothing_library.pyx"],
+        extra_compile_args = ['-O3','-ffast-math','-march=native','-fopenmp'],
+        extra_link_args=['-fopenmp'], libraries=['m']),
 
     Extension("void_library.void_library", 
               ["void_library/void_library.pyx",
