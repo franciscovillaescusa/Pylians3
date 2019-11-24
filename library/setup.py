@@ -70,7 +70,7 @@ setup(
     py_modules=['bias_library', 'CAMB_library', 'correlation_function_library',
                 'cosmology_library', 'HI_image_library/HI_image_library',
                 'HOD_library', 'IM_library', 'mass_function_library',
-                'plotting_library', 'readfof', 'readgadget', 
+                'plotting_library', 'readfof', 'readgadget', 'readsnapHDF5',
                 'readsnap', 'readsnap2', 'readsnap_mpi', 
                 'readsubf', 'routines', 'units_library']
 )

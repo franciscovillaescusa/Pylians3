@@ -1,7 +1,7 @@
 # This library is used to make images from the Illustris simulations
 from mpi4py import MPI
 import numpy as np
-import snapshot as sn
+#import snapshot as sn
 import groupcat
 import readsnapHDF5 as rs
 import HI_library as HIL
