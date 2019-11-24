@@ -27,11 +27,11 @@ ext_modules = [
     #    extra_compile_args = ['-O3','-ffast-math','-march=native','-fopenmp'],
     #    extra_link_args=['-fopenmp'], libraries=['m']),
 
-    #Extension("void_library.void_library", 
-    #          ["void_library/void_library.pyx",
-    #           "void_library/void_openmp_library.c"],
-    #    extra_compile_args = ['-O3','-ffast-math','-march=native','-fopenmp'],
-    #    extra_link_args=['-fopenmp'], libraries=['m']),
+    Extension("void_library.void_library", 
+              ["void_library/void_library.pyx",
+               "void_library/void_openmp_library.c"],
+        extra_compile_args = ['-O3','-ffast-math','-march=native','-fopenmp'],
+        extra_link_args=['-fopenmp'], libraries=['m']),
 
     Extension("integration_library.integration_library",
               ["integration_library/integration_library.pyx",
@@ -68,11 +68,10 @@ setup(
     include_dirs=[numpy.get_include()],
     packages=find_packages(),
     py_modules=['bias_library', 'CAMB_library', 'correlation_function_library',
-                'cosmology_library', 'halos_library', 
-                'HI_image_library/HI_image_library', 'HOD_library', 
-                'IM_library', 'mass_function_library',
+                'cosmology_library', 'HI_image_library/HI_image_library',
+                'HOD_library', 'IM_library', 'mass_function_library',
                 'plotting_library', 'readfof', 'readgadget', 
-                'readsnap', 'readsnap2', 'readsnapHDF5', 'readsnap_mpi', 
+                'readsnap', 'readsnap2', 'readsnap_mpi', 
                 'readsubf', 'routines', 'units_library']
 )
 
