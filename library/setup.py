@@ -42,9 +42,9 @@ ext_modules = [
     Extension("density_field_library.density_field_library", 
               ["density_field_library/density_field_library.pyx"]),
 
-    #Extension("sorting_library.sorting_library", 
-    #          ["sorting_library/sorting_library.pyx"],
-    #          extra_compile_args=['-O3','-ffast-math','-march=native']),
+    Extension("sorting_library.sorting_library", 
+              ["sorting_library/sorting_library.pyx"],
+              extra_compile_args=['-O3','-ffast-math','-march=native']),
 
     Extension("HI_library.HI_library",
               ["HI_library/HI_library.pyx"]),
