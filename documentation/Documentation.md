@@ -78,7 +78,7 @@ Keep in mind that in some systems, python 3 should be executed as ```python3```,
 ## Usage
 We provide some examples on how to use the library for different purposes.
 
-#### <a id="density_field"></a> Density field
+## <a id="density_field"></a> Density field
 
 Pylians provide routines to compute density fields from gadget snapshots. The ingredients needed are:
 
@@ -135,7 +135,7 @@ MASL.MA(pos,delta,BoxSize,MAS)
 delta /= np.mean(delta, dtype=np.float64);  delta -= 1.0 
 ```
 
-#### <a id="auto_Pk"></a> Power spectrum
+## <a id="auto_Pk"></a> Power spectrum
 The ingredients needed to compute the power spectrum are:
 
 - ```delta```. This is the density or overdensity field. It should be a 3 dimensional float numpy array such ```delta = np.zeros((grid, grid, grid), dtype=np.float32)```. See [density field](#density_field) on how to compute  density fields using Pylians.
@@ -176,7 +176,7 @@ Pkphase = Pk.Pkphase #power spectrum of the phases
 Nmodes  = Pk.Nmodes3D
 ```
 
-#### <a id="cross_Pk"></a> Cross-power spectrum
+### <a id="cross_Pk"></a> Cross-power spectrum
 
 Pylians can be used to compute the auto- and cross-power spectrum of multiple fields. For instance, to compute the auto- and cross-power spectra of two overdensity fields, ```delta1``` and ```delta2```:
 
@@ -229,7 +229,7 @@ threads = 16
 Pk = PKL.XPk([delta1,delta2,delta3,delta4], BoxSize, axis, MAS, threads)
 ```
 
-#### <a id="CF"></a> Correlation function
+## <a id="CF"></a> Correlation function
 Pylians can be used to efficiently compute correlation functions of a generic field (e.g. total matter, CDM, gas, halos, neutrinos, CDM+gas, galaxies...etc). The ingredients needed are:
 - ```delta```. This is the overdensity field. It should be a 3 dimensional float numpy array such ```delta = np.zeros((grid, grid, grid), dtype=np.float32)```. See [density field](#density_field) on how to compute  density fields using Pylians.
 - ```BoxSize```. Size of the periodic box. The units of the output power spectrum depend on this.
@@ -259,7 +259,7 @@ Nmodes = CF.Nmodes3D #number of modes
 
 This routine uses a FFT approach that allows a very computationally efficient calculation of the correlation function. However, if the number density of the tracers is very low (i.e. the density field is very sparse) this function may produce strange results. In this case it is better to use the traditional Landy-Szalay routine also available in Pylians.
 
-#### <a id="Bk"></a>Bispectrum
+## <a id="Bk"></a>Bispectrum
 Pylians can compute bispectra of 3D density fields (total matter, CDM, gas, halos, galaxies...etc). The ingredients needed are:
 - ```delta```. This is the overdensity field. It should be a 3 dimensional float numpy array such ```delta = np.zeros((grid, grid, grid), dtype=np.float32)```. See [density field](#density_field) on how to compute  density fields using Pylians.
 - ```BoxSize```. Size of the periodic box. The units of the output bispectrum depend on this. 
@@ -290,7 +290,7 @@ k  = Bk.k_all #k-bins for power spectrum
 Pk = Bk.Pk    #power spectrum
 ```
 
-#### <a id="Voids_P"></a> Voids
+## <a id="Voids_P"></a> Voids
 Pylians can be used to identify voids in a generic density field (e.g. total matter, CDM, gas, halos, neutrinos, CDM+gas, galaxies...etc). The ingredients needed are:
 - ```delta```. This is the overdensity field. It should be a 3 dimensional float numpy array such ```delta = np.zeros((grid, grid, grid), dtype=np.float32)```. See [density field](#density_field) on how to compute  density fields using Pylians.
 - ```BoxSize```. Size of the periodic box. The units of the output power spectrum depend on this.
@@ -324,7 +324,7 @@ VSF         = V.void_vsf    #VSF (#voids/volume/dR)
 if void_field:  void_field  = V.void_field
 ```
 
-#### <a id="Cosmology_P"></a> Cosmology
+## <a id="Cosmology_P"></a> Cosmology
 
 Pylians provide a set of routines to carry out simple cosmological calculations.
 
@@ -357,7 +357,7 @@ Pk_nl = CL.Halofit_12(Omega_m, Omega_l, z, k_lin, Pk_lin)
 ```
 
 
-#### <a id="Integrals_P"></a> Integrals
+## <a id="Integrals_P"></a> Integrals
             
 Pylians provide routines to carry out numerical integrals in a more efficient way than scipy integrate. The philosophy is that to compute the integral $\int_a^b f(x)dx$ the user passes the integrator two arrays, one with some values of x between a and b and another with the values of f(x) at those positions. The integrator will interpolate internally the input data to evaluate the function at an arbitrary position x. Pylians implements in c the fortran odeint function and wrap in python through cython.
 
