@@ -446,5 +446,5 @@ field_smoothed = SL.field_smoothing(field, W_k, threads)
 
 ## <a id="Contact"></a>Contact
 
-For comments, problems, bugs... etc you can reach me at [fvillaescusa@flatironinstitute.org](mailto:fvillaescusa@flatironinstitute.org).
+For comments, problems, bugs... etc you can reach me at [fvillaescusa@princeton.edu](mailto:fvillaescusa@princeton.edu).
 
