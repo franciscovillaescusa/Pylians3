@@ -6,7 +6,7 @@
     - ### [Auto-power spectrum](#auto_Pk)
     - ### [Cross-power spectrum](#cross_Pk)
 * # [Correlation function](#CF)
-* # [Bispectrum](#Bispectrum)
+* # [Bispectrum](#Bk)
 * # [Voids](#Voids)
 * # [Cosmology](#Cosmology)
 * # [Integrals](#Integrals)
@@ -259,7 +259,7 @@ Nmodes = CF.Nmodes3D #number of modes
 
 This routine uses a FFT approach that allows a very computationally efficient calculation of the correlation function. However, if the number density of the tracers is very low (i.e. the density field is very sparse) this function may produce strange results. In this case it is better to use the traditional Landy-Szalay routine also available in Pylians.
 
-#### <a id="Bispectrum"></a>Bispectrum
+#### <a id="Bk"></a>Bispectrum
 Pylians can compute bispectra of 3D density fields (total matter, CDM, gas, halos, galaxies...etc). The ingredients needed are:
 - ```delta```. This is the overdensity field. It should be a 3 dimensional float numpy array such ```delta = np.zeros((grid, grid, grid), dtype=np.float32)```. See [density field](#density_field) on how to compute  density fields using Pylians.
 - ```BoxSize```. Size of the periodic box. The units of the output bispectrum depend on this. 
