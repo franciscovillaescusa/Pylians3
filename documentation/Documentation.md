@@ -7,11 +7,11 @@
     - ### [Cross-power spectrum](#cross_Pk)
 * # [Correlation function](#CF)
 * # [Bispectrum](#Bk)
-* # [Voids](#Voids)
-* # [Cosmology](#Cosmology)
-* # [Integrals](#Integrals)
+* # [Voids](#Voids_P)
+* # [Cosmology](#Cosmology_P)
+* # [Integrals](#Integrals_P)
 * # [Smooth fields](#Smooth)
-* # [Contact](#Contact)
+* # [Contact](#Contact_P)
 
 
 
@@ -290,7 +290,7 @@ k  = Bk.k_all #k-bins for power spectrum
 Pk = Bk.Pk    #power spectrum
 ```
 
-#### <a id="Voids"></a> Voids
+#### <a id="Voids_P"></a> Voids
 Pylians can be used to identify voids in a generic density field (e.g. total matter, CDM, gas, halos, neutrinos, CDM+gas, galaxies...etc). The ingredients needed are:
 - ```delta```. This is the overdensity field. It should be a 3 dimensional float numpy array such ```delta = np.zeros((grid, grid, grid), dtype=np.float32)```. See [density field](#density_field) on how to compute  density fields using Pylians.
 - ```BoxSize```. Size of the periodic box. The units of the output power spectrum depend on this.
@@ -324,7 +324,7 @@ VSF         = V.void_vsf    #VSF (#voids/volume/dR)
 if void_field:  void_field  = V.void_field
 ```
 
-#### <a id="Cosmology"></a> Cosmology
+#### <a id="Cosmology_P"></a> Cosmology
 
 Pylians provide a set of routines to carry out simple cosmological calculations.
 
@@ -357,7 +357,7 @@ Pk_nl = CL.Halofit_12(Omega_m, Omega_l, z, k_lin, Pk_lin)
 ```
 
 
-#### <a id="Integrals"></a> Integrals
+#### <a id="Integrals_P"></a> Integrals
             
 Pylians provide routines to carry out numerical integrals in a more efficient way than scipy integrate. The philosophy is that to compute the integral $\int_a^b f(x)dx$ the user passes the integrator two arrays, one with some values of x between a and b and another with the values of f(x) at those positions. The integrator will interpolate internally the input data to evaluate the function at an arbitrary position x. Pylians implements in c the fortran odeint function and wrap in python through cython.
 
@@ -460,6 +460,6 @@ field_smoothed = SL.field_smoothing(field, W_k, threads)
 ```
 
 
-## <a id="Contact"></a>Contact
+## <a id="Contact_P"></a>Contact
 
 For comments, problems, bugs... etc you can reach me at [villaescusa.francisco@gmail.com](mailto:villaescusa.francisco@gmail.com).
