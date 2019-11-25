@@ -6,6 +6,7 @@
     - ### [Auto-power spectrum](#auto_Pk)
     - ### [Cross-power spectrum](#cross_Pk)
 * # [Correlation function](#CF)
+* # [Bispectrum](#Bispectrum)
 * # [Voids](#Voids)
 * # [Cosmology](#Cosmology)
 * # [Integrals](#Integrals)
@@ -45,18 +46,34 @@ We recommend installing the first packages with [anaconda](https://www.anaconda.
 
 ## <a id="Installation"></a> Installation
 
+Pylians3 can be installed in two different ways:
+
+1.)
 ```python
 cd library
 python setup.py build
 ```
+the compiled libraries and scripts will be located in build/lib.XXX, where XXX depends on your machine. E.g. build/lib.linux-x86_64-3.7 or build/lib.macosx-10.7-x86_64-3.7
 
-The compiled libraries and scripts are in build/lib.XXX, where XXX depends on your machine. E.g. build/lib.linux-x86_64-2.7 or build/lib.macosx-10.7-x86_64-2.7
-
-Add that folder to your PYTHONPATH in ~/.bashrc, e.g.
-
+Add that folder to your PYTHONPATH in ~/.bashrc
 ```sh
-export PYTHONPATH=$PYTHONPATH:$HOME/Pylians/library/build/lib.linux-x86_64-2.7
+export PYTHONPATH=$PYTHONPATH:$HOME/Pylians/library/build/lib.linux-x86_64-3.7
 ```
+2.) 
+```python
+cd library
+python setup.py install
+```
+
+We recommend using the first method since you will know exactly where the libraries are. If you want to uninstall Pylians3 and have used the first option, just delete build folder.
+
+To verify that the installation was successful, do
+```python
+python Tests/import_libraries.py
+```
+If no output is produced, everything went fine.
+
+Keep in mind that in some systems, python 3 should be executed as ```python3```, instead of just ```python```.
 
 ## Usage
 We provide some examples on how to use the library for different purposes.
@@ -242,6 +259,37 @@ Nmodes = CF.Nmodes3D #number of modes
 
 This routine uses a FFT approach that allows a very computationally efficient calculation of the correlation function. However, if the number density of the tracers is very low (i.e. the density field is very sparse) this function may produce strange results. In this case it is better to use the traditional Landy-Szalay routine also available in Pylians.
 
+#### <a id="Bispectrum"></a>Bispectrum
+Pylians can compute bispectra of 3D density fields (total matter, CDM, gas, halos, galaxies...etc). The ingredients needed are:
+- ```delta```. This is the overdensity field. It should be a 3 dimensional float numpy array such ```delta = np.zeros((grid, grid, grid), dtype=np.float32)```. See [density field](#density_field) on how to compute  density fields using Pylians.
+- ```BoxSize```. Size of the periodic box. The units of the output bispectrum depend on this. 
+- ```k1```. The wavenumber of the first side of the considered triangle. Use units in correspondence with ```BoxSize```.
+- ```k2```. The wavenumber of the second size of the considered triangle. Use units in correspondence with ```BoxSize```.
+- ```theta```. This is a numpy array containing the different angles between ```k1``` and ```k2```.  
+- ```MAS```. Mass-assignment scheme used to generate the density field, if any. Possible options are ```'NGP'```, ```'CIC'```, ```'TSC'```, ```'PCS'```.  If the density field has not been generated with any of these set it to ```'None'```.
+- ```threads```. The bispectrum code is openmp parallelized. Set this to the maximum number of cpus per node.
+
+Pylians computes the amplitude of the bispectrum, and reduced bispectrum, for triangles that have sides ```k1``` and ```k2``` and different considered angles between them.
+
+```python
+import numpy as np
+import Pk_library as PKL
+
+BoxSize = 1000.0 #Size of the density field in Mpc/h
+k1      = 0.5    #h/Mpc
+k2      = 0.6    #h/Mpc
+MAS     = 'CIC'
+threads = 1
+theta   = np.linspace(0, np.pi, 25) #array with the angles between k1 and k2
+
+# compute bispectrum
+Bk = PKL.Bk(delta, BoxSize, k1, k2, theta, MAS, threads)
+Bk = Bk.B     #bispectrum
+Qk = Bk.Q     #reduced bispectrum
+k  = Bk.k_all #k-bins for power spectrum
+Pk = Bk.Pk    #power spectrum
+```
+
 #### <a id="Voids"></a> Voids
 Pylians can be used to identify voids in a generic density field (e.g. total matter, CDM, gas, halos, neutrinos, CDM+gas, galaxies...etc). The ingredients needed are:
 - ```delta```. This is the overdensity field. It should be a 3 dimensional float numpy array such ```delta = np.zeros((grid, grid, grid), dtype=np.float32)```. See [density field](#density_field) on how to compute  density fields using Pylians.
@@ -414,4 +462,4 @@ field_smoothed = SL.field_smoothing(field, W_k, threads)
 
 ## <a id="Contact"></a>Contact
 
-For comments, problems, bugs... etc you can reach me at [fvillaescusa@flatironinstitute.org](mailto:fvillaescusa@flatironinstitute.org).
+For comments, problems, bugs... etc you can reach me at [villaescusa.francisco@gmail.com](mailto:villaescusa.francisco@gmail.com).
