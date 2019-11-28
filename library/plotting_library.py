@@ -58,7 +58,7 @@ def density_field_2D(snapshot, x_min, x_max, y_min, y_max, z_min, z_max,
         geometry(snapshot, plane, x_min, x_max, y_min, y_max, z_min, z_max)
 
     # find the name of the density field and read it if already exists
-    f_df = PL.density_field_name(snapshot, x_min, x_max, y_min, y_max, 
+    f_df = density_field_name(snapshot, x_min, x_max, y_min, y_max, 
                                  z_min, z_max, dims, ptypes, plane, MAS)
     if os.path.exists(f_df):
         print('\nDensity field already computed. Reading it from file...')

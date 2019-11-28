@@ -10,13 +10,13 @@ from matplotlib.colors import LogNorm
 
 ################################# INPUT #######################################
 # snapshot
-snapshot = '../snapdir_003/snap_003'
+snapshot = '/mnt/ceph/users/fvillaescusa/Quijote/Snapshots/latin_hypercube_HR/0/snapdir_004/snap_004'
 
 # density field parameters
-x_min, x_max = 0.0, 1000.0
-y_min, y_max = 0.0, 1000.0
-z_min, z_max = 0.0, 10.0
-grid         = 512
+x_min, x_max = 0.0, 500.0
+y_min, y_max = 0.0, 500.0
+z_min, z_max = 0.0, 20.0
+grid         = 1024
 ptypes       = [1]   # 0-Gas, 1-CDM, 2-NU, 4-Stars; can deal with several species
 plane        = 'XY'  #'XY','YZ' or 'XZ'
 MAS          = 'PCS' #'NGP', 'CIC', 'TSC', 'PCS' 
@@ -24,14 +24,14 @@ save_df      = True  #whether save the density field into a file
 
 # image parameters
 fout            = 'Image.png'
-min_overdensity = 0.1      #minimum overdensity to plot
-max_overdensity = 100.0    #maximum overdensity to plot
-scale           = 'linear' #'linear' or 'log'
-cmap            = 'nipy_spectral'
+min_overdensity = 0.5      #minimum overdensity to plot
+max_overdensity = 50.0    #maximum overdensity to plot
+scale           = 'log' #'linear' or 'log'
+cmap            = 'hot'
 ###############################################################################
 
 # compute 2D overdensity field
-dx, x, dy, y, overdensity = density_field_2D(snapshot, x_min, x_max, y_min, y_max,
+dx, x, dy, y, overdensity = PL.density_field_2D(snapshot, x_min, x_max, y_min, y_max,
                                              z_min, z_max, grid, ptypes, plane, MAS, save_df)
 
 
@@ -53,11 +53,11 @@ overdensity[np.where(overdensity<min_overdensity)] = min_overdensity
 
 if scale=='linear':
     cax = ax1.imshow(overdensity,cmap=get_cmap(cmap),origin='lower',
-                     extent=[x, x+dx, y, y+dy], interpolation='sinc',
+                     extent=[x, x+dx, y, y+dy], interpolation='bicubic',
                      vmin=min_overdensity,vmax=max_overdensity)
 else:
     cax = ax1.imshow(overdensity,cmap=get_cmap(cmap),origin='lower',
-                     extent=[x, x+dx, y, y+dy], interpolation='sinc',
+                     extent=[x, x+dx, y, y+dy], interpolation='bicubic',
                      norm = LogNorm(vmin=min_overdensity,vmax=max_overdensity))
 
 cbar = fig.colorbar(cax)
