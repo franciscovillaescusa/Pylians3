@@ -353,7 +353,7 @@ snapshot = '../snapdir_003/snap_003'
 x_min, x_max = 0.0, 1000.0
 y_min, y_max = 0.0, 1000.0
 z_min, z_max = 0.0, 10.0
-grid         = 512
+grid         = 1024
 ptypes       = [1]   # 0-Gas, 1-CDM, 2-NU, 4-Stars; can deal with several species
 plane        = 'XY'  #'XY','YZ' or 'XZ'
 MAS          = 'PCS' #'NGP', 'CIC', 'TSC', 'PCS' 
@@ -361,15 +361,15 @@ save_df      = True  #whether save the density field into a file
 
 # image parameters
 fout            = 'Image.png'
-min_overdensity = 0.1      #minimum overdensity to plot
-max_overdensity = 100.0    #maximum overdensity to plot
-scale           = 'linear' #'linear' or 'log'
-cmap            = 'nipy_spectral'
+min_overdensity = 0.5      #minimum overdensity to plot
+max_overdensity = 50.0    #maximum overdensity to plot
+scale           = 'log' #'linear' or 'log'
+cmap            = 'hot'
 
 
 # compute 2D overdensity field
-dx, x, dy, y, overdensity = density_field_2D(snapshot, x_min, x_max, y_min, y_max,
-                                             z_min, z_max, grid, ptypes, plane, MAS, save_df)
+dx, x, dy, y, overdensity = PL.density_field_2D(snapshot, x_min, x_max, y_min, y_max,
+                                                z_min, z_max, grid, ptypes, plane, MAS, save_df)
 
 
 # plot density field
@@ -390,11 +390,11 @@ overdensity[np.where(overdensity<min_overdensity)] = min_overdensity
 
 if scale=='linear':
     cax = ax1.imshow(overdensity,cmap=get_cmap(cmap),origin='lower',
-                     extent=[x, x+dx, y, y+dy], interpolation='sinc',
+                     extent=[x, x+dx, y, y+dy], interpolation='bicubic',
                      vmin=min_overdensity,vmax=max_overdensity)
 else:
     cax = ax1.imshow(overdensity,cmap=get_cmap(cmap),origin='lower',
-                     extent=[x, x+dx, y, y+dy], interpolation='sinc',
+                     extent=[x, x+dx, y, y+dy], interpolation='bibcubic',
                      norm = LogNorm(vmin=min_overdensity,vmax=max_overdensity))
 
 cbar = fig.colorbar(cax)
@@ -402,6 +402,10 @@ cbar.set_label(r"$\rho/\bar{\rho}$",fontsize=20)
 savefig(fout, bbox_inches='tight')
 close(fig)
 ```
+
+The above script, on one of the [Quijote simulations](https://github.com/franciscovillaescusa/Quijote-simulations) produces the following image:
+
+<p align="center"><img src="LSS.png" alt="voids_test" width="700"/></p>
 
 
 ## <a id="Cosmology_P"></a> Cosmology
