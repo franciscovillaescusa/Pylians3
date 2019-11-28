@@ -3,7 +3,6 @@
 # Then it identifies the voids using the void finder. Finally, it plots
 # the average density field across the entire box of the input and 
 # recovered void field
-
 import numpy as np 
 import sys,os,time
 import void_library as VL
@@ -12,7 +11,7 @@ from matplotlib.colors import LogNorm
 
 ############################### INPUT #####################################
 BoxSize = 1000.0 #Mpc/h
-Nvoids  = 10      #number of random voids 
+Nvoids  = 10     #number of random voids 
 dims    = 512    #grid resolution to find voids
 
 threshold = -0.5 #for delta(r)=-1*(1-(r/R)^3)

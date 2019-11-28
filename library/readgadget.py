@@ -64,7 +64,10 @@ def read_field(snapshot, block, ptype):
 
     filename, fformat = fname_format(snapshot)
     head              = header(filename)
-
+    Masses            = head.massarr*1e10 #Msun/h                  
+    Npart             = head.npart        #number of particles in the subfile
+    Nall              = head.nall         #total number of particles in the snapshot
+    
     if fformat=="binary":
         return readsnap.read_block(filename, block, parttype=ptype)
     else:
@@ -75,7 +78,15 @@ def read_field(snapshot, block, ptype):
         elif block=="ID  ":  suffix = "ParticleIDs"
         elif block=="VEL ":  suffix = "Velocities"
         else: raise Exception('block not implemented in readgadget!')
-        array = f[prefix+suffix][:];  f.close()
+
+        if '%s%s'%(prefix,suffix) not in f.keys():
+            if Masses[ptype] != 0.0:
+                array = np.ones(Npart[ptype], np.float32)*Masses[ptype]
+            else:
+                raise Exception('Problem reading the block %s'%block)
+        else:
+            array = f[prefix+suffix][:]
+        f.close()
 
         if block=="VEL ":  array *= np.sqrt(head.time)
         if block=="POS " and array.dtype==np.float64:

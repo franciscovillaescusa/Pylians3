@@ -1,12 +1,11 @@
+# This library contains scripts that can be used to plot density fields
 import numpy as np
-import readsnap,readgadget
+import readgadget
 import MAS_library as MASL
 import sys,os
 
-# This library contains scripts that can be used to plot density field
-
 # This routine finds the name of the density field
-def density_field_name(snapshot_fname, x_min, x_max, y_min, y_max, 
+def density_field_name(snapshot, x_min, x_max, y_min, y_max, 
                        z_min, z_max, dims, ptypes, plane, MAS):
 
     # this is a number that describes the ptypes used.
@@ -18,15 +17,15 @@ def density_field_name(snapshot_fname, x_min, x_max, y_min, y_max,
     # name of the density field
     f_df = 'density_field_%.3f_%.3f_%.3f_%.3f_%.3f_%.3f_%d_%d_%s_%s_%s.npy'\
            %(x_min, x_max, y_min, y_max, z_min, z_max, dims, part_num, 
-             plane, MAS, snapshot_fname[-3:])
+             plane, MAS, snapshot[-3:])
 
     return f_df
 
 # This routine computes the coordinates of the density field square 
-def geometry(snapshot_fname, plane, x_min, x_max, y_min, y_max, z_min, z_max):
+def geometry(snapshot, plane, x_min, x_max, y_min, y_max, z_min, z_max):
 
     # read snapshot head and obtain BoxSize
-    head    = readgadget.header(snapshot_fname)
+    head    = readgadget.header(snapshot)
     BoxSize = head.boxsize/1e3 #Mpc/h                    
 
     plane_dict = {'XY':[0,1], 'XZ':[0,2], 'YZ':[1,2]}
@@ -42,7 +41,7 @@ def geometry(snapshot_fname, plane, x_min, x_max, y_min, y_max, z_min, z_max):
         length1 = y_max-y_min;  length2 = z_max-z_min;  depth = x_max-x_min 
         offset1 = y_min;        offset2 = z_min
     if length1!=length2:
-        print('Plane has to be a square!!!'); sys.exit()
+        raise Exception('Plane has to be a square!!')
     BoxSize_slice = length1
 
     return length1, offset1, length2, offset2, depth, BoxSize_slice
@@ -50,29 +49,32 @@ def geometry(snapshot_fname, plane, x_min, x_max, y_min, y_max, z_min, z_max):
 
 # This routine reads the positions (and masses) of the particle type choosen
 # and computes the 2D density field using NGP, CIC, TSC or PCS
-def density_field_2D(snapshot_fname, x_min, x_max, y_min, y_max, z_min, z_max,
+def density_field_2D(snapshot, x_min, x_max, y_min, y_max, z_min, z_max,
                      dims, ptypes, plane, MAS, save_density_field):
-    
+
+
+    # find the geometric values of the density field square
+    dx, x, dy, y, depth, BoxSize_slice = \
+        geometry(snapshot, plane, x_min, x_max, y_min, y_max, z_min, z_max)
+
+    # find the name of the density field and read it if already exists
+    f_df = PL.density_field_name(snapshot, x_min, x_max, y_min, y_max, 
+                                 z_min, z_max, dims, ptypes, plane, MAS)
+    if os.path.exists(f_df):
+        print('\nDensity field already computed. Reading it from file...')
+        overdensity = np.load(f_df);  return dx, x, dy, y, overdensity
+
+    # if not, compute it
+    print('\nComputing density field...')
     plane_dict = {'XY':[0,1], 'XZ':[0,2], 'YZ':[1,2]}
 
     # read snapshot head and obtain BoxSize, filenum...
-    head     = readgadget.header(snapshot_fname)
+    head     = readgadget.header(snapshot)
     BoxSize  = head.boxsize/1e3 #Mpc/h                    
     Nall     = head.nall
     Masses   = head.massarr*1e10 #Msun/h                  
     filenum  = head.filenum
     redshift = head.redshift
-
-    # find the geometric values of the density field square
-    len_x, off_x, len_y, off_y, depth, BoxSize_slice = \
-            geometry(snapshot_fname, plane, x_min, x_max, y_min, y_max, 
-                    z_min, z_max)
-
-    # compute the mean density in the box
-    if len(ptypes)==1 and Masses[ptypes[0]]!=0.0:
-        single_specie = True
-    else:
-        single_specie = False
 
     # define the density array
     overdensity = np.zeros((dims,dims), dtype=np.float32)
@@ -82,19 +84,23 @@ def density_field_2D(snapshot_fname, x_min, x_max, y_min, y_max, z_min, z_max,
     for i in range(filenum):
 
         # find the name of the subfile
-        snap = snapshot_fname + '.%d'%i
+        snap1 = '%s.%d'%(snapshot,i)
+        snap2 = '%s.%d.hdf5'%(snapshot,i)
+        snap3 = '%s'%(snapshot)
+        if   os.path.exists(snap1):  snap = snap1
+        elif os.path.exists(snap2):  snap = snap2
+        elif os.path.exists(snap3):  snap = snap3
+        else:  raise Exception('Problem with the snapshot name!')                
 
-        # in the last snapshot we renormalize the field
+        # in the last subfile we renormalize the field
         if i==filenum-1:  renormalize_2D = True
 
-        # do a loop over 
+        # do a loop over all particle types
         for ptype in ptypes:
 
             # read the positions of the particles in Mpc/h
             pos = readgadget.read_field(snap,"POS ",ptype)/1e3
-
-            if single_specie:  total_mass += len(pos)
-
+            
             # keep only with the particles in the slice
             indexes = np.where((pos[:,0]>x_min) & (pos[:,0]<x_max) &
                                (pos[:,1]>y_min) & (pos[:,1]<y_max) &
@@ -107,30 +113,25 @@ def density_field_2D(snapshot_fname, x_min, x_max, y_min, y_max, z_min, z_max,
             # project particle positions into a 2D plane
             pos = pos[:,plane_dict[plane]]
 
-            # read the masses of the particles in Msun/h
-            if not(single_specie):
-                mass = readgadget.read_field(snap,"MASS",ptype)*1e10
-                total_mass += np.sum(mass, dtype=np.float64)
-                mass = mass[indexes]
-                MASL.MA(pos, overdensity, BoxSize_slice, MAS=MAS, W=mass,
-                        renormalize_2D=renormalize_2D)
-            else:
-                mass_slice += len(pos)
-                MASL.MA(pos, overdensity, BoxSize_slice, MAS=MAS, W=None,
-                        renormalize_2D=renormalize_2D)
+            # read the masses of the particles
+            mass = readgadget.read_field(snap,"MASS",ptype)*1e10
+            total_mass += np.sum(mass, dtype=np.float64)
+            mass = mass[indexes];  mass_slice += np.sum(mass)
+
+            # update 2D density field
+            MASL.MA(pos, overdensity, BoxSize_slice, MAS=MAS, W=mass,
+                    renormalize_2D=renormalize_2D)
+            
 
     print('Expected mass = %.7e'%mass_slice)
     print('Computed mass = %.7e'%np.sum(overdensity, dtype=np.float64))
 
     # compute mean density in the whole box
     mass_density = total_mass*1.0/BoxSize**3 #(Msun/h)/(Mpc/h)^3 or #/(Mpc/h)^3
-
     print('mass density = %.5e'%mass_density)
 
-    # compute the volume of each cell in the density field slice
+    # compute the volume and mean mass of each cell of the slice
     V_cell = BoxSize_slice**2*depth*1.0/dims**2  #(Mpc/h)^3
-
-    # compute the mean mass in each cell of the slice
     mean_mass = mass_density*V_cell #Msun/h or #
 
     # compute overdensities
@@ -142,8 +143,5 @@ def density_field_2D(snapshot_fname, x_min, x_max, y_min, y_max, z_min, z_max,
     overdensity = np.transpose(overdensity)
 
     # save density field to file
-    f_df = density_field_name(snapshot_fname, x_min, x_max, y_min, y_max, 
-                              z_min, z_max, dims, ptypes, plane, MAS)
     if save_density_field:  np.save(f_df, overdensity)
-
-    return overdensity
+    return dx, x, dy, y, overdensity
