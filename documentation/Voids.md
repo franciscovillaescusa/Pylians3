@@ -6,7 +6,7 @@ Pylians3 can be used to identify voids in a generic density field; e.g. matter, 
 
 Pylians3 uses the spherical overdensity void finder described in [Banerjee & Dalal 2016](https://ui.adsabs.harvard.edu/abs/2016JCAP...11..015B). We provide an example on how spherical voids can be easily identified with the void finder routine available in Pylians3. The script can be found in ```Pylians3/Voids/spheres_test.py```. That code generates random spheres with density profiles given by delta(r) = -1*(1-(r/R)^3) in a given cosmological volume. Note that for this density profile, the average overdensity at the void radius, R, is -0.5. The script then identifies the voids in that density field and finally plot the results. A figure like this should be obtained:
 
-<img src="Spheres_test.png" alt="voids_test" width="400"/>
+<p align="center"><img src="Spheres_test.png" alt="voids_test" width="700"/></p>
 
 The left panel shows the projected density field of the generated random uniform spheres. The right panel displays the projected field of the identified voids. Note that, visually, density profiles look different in the two cases because the void finder set to 1 every voxel that belongs to a void, while the random spheres follow the above density profiles. The code also outputs the positions and radii of the generated and identified spheres.
 
