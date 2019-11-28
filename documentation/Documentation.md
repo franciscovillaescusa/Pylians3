@@ -72,7 +72,7 @@ To verify that the installation was successful, do
 ```python
 python Tests/import_libraries.py
 ```
-If no output is produced, everything went fine.
+If no output is produced, everything went fine. On MACs, sometimes is hard to compile the libraries, because they require openmp and may not be trivial to install it. If you are experience problems with this, we recommend that you open the ```setup.py``` file and remove all ```openmp``` instances.
 
 Keep in mind that in some systems, python 3 should be executed as ```python3```, instead of just ```python```.
 
