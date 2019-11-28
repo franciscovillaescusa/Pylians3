@@ -350,9 +350,9 @@ from matplotlib.colors import LogNorm
 snapshot = '/mnt/ceph/users/fvillaescusa/Quijote/Snapshots/latin_hypercube_HR/0/snapdir_004/snap_004'
 
 # density field parameters
-x_min, x_max = 0.0, 1000.0
-y_min, y_max = 0.0, 1000.0
-z_min, z_max = 0.0, 10.0
+x_min, x_max = 0.0, 500.0
+y_min, y_max = 0.0, 500.0
+z_min, z_max = 0.0, 20.0
 grid         = 1024
 ptypes       = [1]   # 0-Gas, 1-CDM, 2-NU, 4-Stars; can deal with several species
 plane        = 'XY'  #'XY','YZ' or 'XZ'
