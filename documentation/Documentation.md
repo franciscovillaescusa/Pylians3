@@ -347,7 +347,7 @@ from matplotlib.colors import LogNorm
 
 
 #snapshot name
-snapshot = '../snapdir_003/snap_003' 
+snapshot = '/mnt/ceph/users/fvillaescusa/Quijote/Snapshots/latin_hypercube_HR/0/snapdir_004/snap_004'
 
 # density field parameters
 x_min, x_max = 0.0, 1000.0
