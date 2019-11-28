@@ -325,6 +325,8 @@ VSF         = V.void_vsf    #VSF (#voids/volume/dR)
 if void_field:  void_field  = V.void_field
 ```
 
+For more details on the void finder see [here](Voids.md).
+
 ## <a id="Plots_df"></a> Plots
 
 Pylians provide a set of routines to quickly make plots of density fields of simulations. For instance, to generate the density field of a slice of a Gadget N-body snapshot, the ingredients needed are:
