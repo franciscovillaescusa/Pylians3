@@ -109,7 +109,7 @@ def find_block(filename, format, swap, block, block_num, only_list_blocks=False)
   while ((not found) and (f.tell()<filesize)):
     if format==2:
       f.seek(4, os.SEEK_CUR)
-      curblock = f.read(4)
+      curblock = f.read(4).decode()
       if (block == curblock):
         found = True
       f.seek(8, os.SEEK_CUR)  
