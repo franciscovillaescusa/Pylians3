@@ -58,7 +58,7 @@ the compiled libraries and scripts will be located in build/lib.XXX, where XXX d
 
 Add that folder to your PYTHONPATH in ~/.bashrc
 ```sh
-export PYTHONPATH=$PYTHONPATH:$HOME/Pylians/library/build/lib.linux-x86_64-3.7
+export PYTHONPATH=$PYTHONPATH:$HOME/Pylians3/library/build/lib.linux-x86_64-3.7
 ```
 2.) 
 ```python
