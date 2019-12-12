@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+import sys,os,readsnap,argparse,readgadget
+
+# read parameters
+parser = argparse.ArgumentParser(description="read the header of a Gadget file and prints its content")
+parser.add_argument("filename",help="gadget file name")
+args = parser.parse_args();  filename = args.filename
+
+# find actual file
+if os.path.exists(filename):	     curfilename = filename
+elif os.path.exists(filename+".0"):  curfilename = filename+".0"
+else:                                raise Exception("file not found")
+
+rhocrit = 2.77536627e2 #h**2 M_sun/kpc**3
+pname = {0:'GAS  ', 1:'CDM  ', 2:'NU   ', 3:'type3', 4:'Stars', 5:'BH   '}
+
+# read header
+head = readgadget.header(filename)
+#head  = readsnap.snapshot_header(curfilename)
+npart = head.npart;  nall = head.nall;  masses = head.massarr*1e10  
+Omega = head.nall*masses/(head.boxsize**3*rhocrit)
+
+# print header info
+print('\nType        npart         nall       M(Msun/h)     Omega')
+print('----------------------------------------------------------')
+for i in range(6):
+   print('%s: %12d %12d %14.5e %10.6f'%(pname[i], npart[i], nall[i], 
+                                         masses[i], Omega[i]))
+print('----------------------------------------------------------')
+
+print('z = %10.5f     : L = %8.2f Mpc/h :   a = %.7f'\
+   %(head.redshift, head.boxsize/1e3, head.time))
+print('%6d subfiles    : cooling %d          : Mnu = %.6f eV'\
+   %(head.filenum, head.cooling, Omega[2]*head.hubble**2*94.1745))
+print('Omega_m = %.6f : Omega_l = %.6f :   h = %.6f\n'\
+   %(head.omega_m, head.omega_l, head.hubble))
+  
+

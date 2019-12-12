@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+import numpy as np 
+import readfof
+import sys,os,argparse
+
+
+parser = argparse.ArgumentParser(description="This routine reads a FoF catalogue with multiple subfiles and compress it to a single file")
+
+parser.add_argument("snapdir", help="directory where the groups_XXX folder are")
+parser.add_argument("snapnums", type=int, nargs='+', 
+                    help="snapnums of the FoF files. E.g. 0 1 2 3")
+parser.add_argument("--long_ids", dest="long_ids", action="store_true", 
+                    default=False, help="--long_ids for long IDs")
+parser.add_argument("--SFR", dest="SFR", action="store_true", 
+                    default=False, help="--SFR for hydro sims")
+parser.add_argument("--swap", dest="swap", action="store_true", 
+                    default=False, help="--swap when swap")
+parser.add_argument("--no_read_ids", dest="no_read_ids", action="store_true", 
+                    default=False, help="whether read the ids")
+args        = parser.parse_args()
+snapdir     = args.snapdir
+snapnums    = args.snapnums
+no_read_ids = args.no_read_ids
+long_ids    = args.long_ids
+SFR         = args.SFR;
+swap        = args.swap
+
+
+    
+# do a loop over the different snapnums
+for snapnum in snapnums:
+
+    FoF_folder     = snapdir+'/groups_%03d'%snapnum
+    old_FoF_folder = snapdir+'/original_groups_%03d'%snapnum
+    if os.path.exists(FoF_folder):
+
+        # find the number of files in the directory
+        files = len(os.listdir(FoF_folder))
+        if files<=2:
+            print 'Only %d files found!!!'%files;  continue
+
+        print "\n%s folder exists : contains %d files"%(FoF_folder,files)
+
+        # create new FoF file
+        f_tab = '%s/group_tab_%03d.0'%(snapdir,snapnum)
+        f_ids = '%s/group_ids_%03d.0'%(snapdir,snapnum)
+
+        FoF = readfof.FoF_catalog(snapdir,snapnum,long_ids=long_ids,
+                                  swap=swap, SFR=SFR, read_IDs=not(no_read_ids))
+
+        if not(no_read_ids):  readfof.writeFoFCatalog(FoF, f_tab, f_ids)
+        else:                 readfof.writeFoFCatalog(FoF, f_tab, False)
+       
+        # rename FoF folder, create new FoF folder and move files to it
+        os.system('mv '+FoF_folder+' '+old_FoF_folder)
+        os.system('mkdir '+FoF_folder)
+
+        if not(no_read_ids):  os.system('mv '+f_tab+' '+f_ids+' '+FoF_folder)
+        else:                 os.system('mv '+f_tab+' '+FoF_folder)
+
+        ##### check that files are exactly the same #####
+        catalog1 = readfof.FoF_catalog(snapdir, snapnum, long_ids=long_ids, swap=swap,
+                                       SFR=SFR, read_IDs=not(no_read_ids))
+        catalog2 = readfof.FoF_catalog(snapdir, snapnum, long_ids=long_ids, swap=swap,
+                                       SFR=SFR, read_IDs=not(no_read_ids), 
+                                       prefix='/original_groups_')
+
+        for [attr1, value1], [attr2, value2] in zip(catalog1.__dict__.iteritems(), catalog2.__dict__.iteritems()):
+            if '%s'%attr1 in ['Ngroups','Nids', 'Nfiles']:  continue
+            print '%s'%attr1
+            if not(np.array_equal(value1, value2)):
+                raise Exception('different %s: %s vs %s'%(attr1,value1,value2))
+        print 'Verified that the above arrays are the same in the old and new files'
+
