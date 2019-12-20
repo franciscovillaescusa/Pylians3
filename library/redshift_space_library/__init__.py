@@ -1,2 +1,2 @@
-__all__=['HI_image_library']
+__all__=['redshift_space_library']
 from .redshift_space_library import *
