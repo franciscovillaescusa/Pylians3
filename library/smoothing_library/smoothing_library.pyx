@@ -86,6 +86,70 @@ cpdef FT_filter(float BoxSize, float R, int dims, Filter, int threads):
     return np.asarray(field_k)
 
 ############################################################################
+# This routine places the filter on a 2D grid and returns its FT
+@cython.boundscheck(False)
+@cython.cdivision(True)
+@cython.wraparound(False)
+cpdef FT_filter_2D(float BoxSize, float R, int grid, Filter, int threads):
+
+    cdef int i,j,i1,j1,middle,d2
+    cdef float R2, R_grid, factor
+    cdef double normalization
+    cdef float[:,::1] field
+    cdef np.complex64_t[:,::1] field_k
+
+    if Filter not in ['Top-Hat','Gaussian']:
+        raise Exception('Filter %s not implemented!'%Filter)
+
+    middle = grid//2
+    normalization = 0.0
+    R_grid = (R*grid/BoxSize)
+    R2 = R_grid**2
+
+    # define the field array
+    field = np.zeros((grid,grid), dtype=np.float32)
+
+    ###### Top-Hat ######
+    if Filter=='Top-Hat':
+        for i in prange(grid, nogil=True):
+            i1 = i
+            if i1>middle:  i1 = i1 - grid
+
+            for j in range(grid):
+                j1 = j
+                if j1>middle:  j1 = j1 - grid
+
+                d2 = i1*i1 + j1*j1
+                if d2<=R2:  
+                    field[i,j] = 1.0
+                    normalization += 1.0
+
+    ###### Gaussian ######
+    if Filter=='Gaussian':
+        for i in prange(grid, nogil=True):
+            i1 = i
+            if i1>middle:  i1 = i1 - grid
+
+            for j in range(grid):
+                j1 = j
+                if j1>middle:  j1 = j1 - grid
+
+                d2 = i1*i1 + j1*j1
+                
+                factor = exp(-d2/(2.0*R2))
+                field[i,j] = factor
+                normalization += factor
+
+    # normalize the field
+    for i in prange(grid, nogil=True):
+        for j in range(grid):
+            field[i,j] = field[i,j]/normalization
+    
+    # FT the field
+    field_k = PKL.FFT2Dr_f(np.asarray(field), threads)
+    return np.asarray(field_k)
+
+############################################################################
 # This routine smooths a field with a given filter and returns the smoothed 
 # field. Inputs are the field, the FT of the filter and the number of threads
 @cython.boundscheck(False)
@@ -112,3 +176,30 @@ cpdef field_smoothing(field, np.complex64_t[:,:,::1] filter_k, int threads):
                                        
     # Fourier transform back
     return PKL.IFFT3Dr_f(field_k,threads)
+
+############################################################################
+# This routine smooths a 2D field with a given filter and returns the smoothed 
+# field. Inputs are the 2D field, the FT of the filter and the number of threads
+@cython.boundscheck(False)
+@cython.cdivision(True)
+@cython.wraparound(False)
+cpdef field_smoothing_2D(field, np.complex64_t[:,::1] filter_k, int threads):
+
+    cdef int i,j,grid,middle
+    cdef np.complex64_t[:,::1] field_k
+
+    # check that dimensions are the same
+    grid = field.shape[0];  middle = grid//2
+    if field.shape[0]!=filter_k.shape[0]:
+        raise Exception('field and filter have different grids!!!')
+
+    ## compute FFT of the field (change this for double precision) ##
+    field_k = PKL.FFT2Dr_f(field,threads) 
+
+    # do a loop over the independent modes.
+    for i in prange(grid, nogil=True):
+        for j in range(middle+1): #k=[0,1,..,middle] --> kz>0
+            field_k[i,j] = field_k[i,j]*filter_k[i,j]
+                                       
+    # Fourier transform back
+    return PKL.IFFT2Dr_f(field_k,threads)
