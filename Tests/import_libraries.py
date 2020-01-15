@@ -5,7 +5,7 @@ import bias_library
 import cosmology_library
 import density_field_library
 import HI_clusters_library
-import HI_image_library
+#import HI_image_library #requires groupcat
 import HI_library
 import HOD_library
 #import IM_library  #requires healpy, emcee, corner
