@@ -136,7 +136,6 @@ class Bk:
                     Pk[0] += (delta1[kxx,kyy,kzz]*delta1[kxx,kyy,kzz])
                     pairs += (I1[kxx,kyy,kzz]*I1[kxx,kyy,kzz])
         Pk[0] = (Pk[0]/pairs)*(BoxSize/dims**2)**3
-        
 
         # fill the delta2_k array and compute delta2
         delta2_k = np.zeros((dims, dims, dims//2+1), dtype=np.complex64)
@@ -169,6 +168,7 @@ class Bk:
                 I3_k[kxx,kyy,kzz]     = 1.0
             delta3 = PKL.IFFT3Dr_f(delta3_k, threads)
             I3     = PKL.IFFT3Dr_f(I3_k,     threads)
+            del delta3_k, I3_k
 
             # compute Pk(k3)
             Pk[j+2],pairs = 0.0, 0.0
