@@ -166,9 +166,8 @@ class Bk:
                 kxx, kyy, kzz = ID//dims2, (ID%dims2)//dims, (ID%dims2)%dims
                 delta3_k[kxx,kyy,kzz] = delta_k[kxx,kyy,kzz]
                 I3_k[kxx,kyy,kzz]     = 1.0
-            delta3 = PKL.IFFT3Dr_f(delta3_k, threads)
-            I3     = PKL.IFFT3Dr_f(I3_k,     threads)
-            del delta3_k, I3_k
+            delta3 = PKL.IFFT3Dr_f(delta3_k, threads);  del delta3_k
+            I3     = PKL.IFFT3Dr_f(I3_k,     threads);  del I3_k
 
             # compute Pk(k3)
             Pk[j+2],pairs = 0.0, 0.0
