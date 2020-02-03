@@ -10,6 +10,7 @@
 * # [Voids](#Voids_P)
 * # [Plots](#Plots_df)
 * # [Cosmology](#Cosmology_P)
+* # [Redshift space distortions](#RSD)
 * # [Integrals](#Integrals_P)
 * # [Smooth fields](#Smooth)
 * # [Contact](#Contact_P)
@@ -136,6 +137,32 @@ MASL.MA(pos,delta,BoxSize,MAS)
 delta /= np.mean(delta, dtype=np.float64);  delta -= 1.0 
 ```
 
+Pylians can also compute density fields where each particle/halo has a different weight. This can be useful in the case where the observed field is constructed in that way, e.g. the 21cm field is built from gas particles weighting each of them by its HI mass.
+
+```python
+import numpy as np
+import MAS_library as MASL
+
+# input parameters
+grid    = 512  
+BoxSize = 1000 #Mpc/h
+MAS     = 'CIC'
+
+# define the array hosting the density field
+delta = np.zeros((grid,grid,grid), dtype=np.float32)
+
+# read the particle positions
+pos     = np.loadtxt('myfile.txt')  #Mpc/h 
+pos     = pos.astype(np.float32)    #pos should be a numpy float array
+weights = np.loadtxt('weights.txt') #weights of the particles 
+
+# compute density field taking into account the particle weights
+MASL.MA(pos,delta,BoxSize,MAS,W=weights)
+
+# compute overdensity field
+delta /= np.mean(delta, dtype=np.float64);  delta -= 1.0 
+```
+
 ## <a id="auto_Pk"></a> Power spectrum
 The ingredients needed to compute the power spectrum are:
 
@@ -144,7 +171,6 @@ The ingredients needed to compute the power spectrum are:
 - ```axis```. Axis along which compute the quadrupole, hexadecapole and the 2D power spectrum. If the field is in real-space set ```axis=0```. If the field is in redshift-space set ```axis=0```, ```axis=1``` or ```axis=2``` if the redshift-space distortions have been placed along the x-axis, y-axis or z-axis, respectively. 
 - ```MAS```. Mass-assignment scheme used to generate the density field, if any. Possible options are ```'NGP'```, ```'CIC'```, ```'TSC'```, ```'PCS'```.  If the density field has not been generated with any of these set it to ```'None'```.
 - ```threads```. Number of openmp threads to be used.
-
 
 The power spectrum can be computed as:
 
@@ -438,6 +464,24 @@ Omega_l = 0.6825
 k_lin, Pk_lin = np.loadtxt('my_Pk_file_z=0.txt', unpack=True)
 
 Pk_nl = CL.Halofit_12(Omega_m, Omega_l, z, k_lin, Pk_lin) 
+```
+
+
+## <a id="RSD"></a> Redshift space distortions
+
+Pylians provide a simple routine to displace particle positions from real-space to redshift-space. The ingredients needed are:
+
+- ```pos```. This is an array with the co-moving positions of the particles. Should be float numpy array. Notice that this array will be overwritten with the positions of the particles in redshift-space. So if you want to keep the positions of the original particles, is better to pass a copy of this array: e.g. ```pos_RSD = np.copy(pos)```. Units should be Mpc/h.
+- ```vel```. This is an array with the peculiar velocities of the particles. Should be a float numpy array. Units should be km/s
+- ```BoxSize```. Size of the simulation box.
+- ```Hubble```. Value of the Hubble constant at redshift ```redshift```. Units should be (km/s)/(Mpc/h).
+- ```redshift```. The considered redshift.
+- ```axis```. Redshift-space distortions are going to be place along the x-(axis=0), y-(axis=1) or z-(axis=2) axis.
+
+```python
+import redshift_space_library as RSL
+
+RSL.pos_redshift_space(pos, vel, BoxSize, Hubble, redshift, axis)
 ```
 
 
