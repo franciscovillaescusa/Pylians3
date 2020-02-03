@@ -37,10 +37,10 @@ class Bk:
         cdef int dims, dims2, middle, bins, i, j
         cdef long ID
         cdef list numbers
-        cdef double k, prefact, triangles, pairs
+        cdef double k, prefact, pairs
         cdef double MAS_corr[3]
         cdef np.ndarray[np.float64_t, ndim=1] k_min, k_max
-        cdef np.ndarray[np.float64_t, ndim=1] B, Q, kall, Pk
+        cdef np.ndarray[np.float64_t, ndim=1] B, Q, triangles, kall, Pk
         ####### change this for double precision ######
         cdef float MAS_factor
         cdef np.complex64_t[:,:,::1] delta_k, delta1_k, delta2_k, delta3_k
@@ -56,14 +56,15 @@ class Bk:
         MAS_index = PKL.MAS_function(MAS)
 
         # find the number of bins in theta. Define B, k_min, k_max arrays values of k3
-        bins  = theta.shape[0]
-        B     = np.zeros(bins,   dtype=np.float64)
-        Q     = np.zeros(bins,   dtype=np.float64)
-        k_min = np.zeros(bins+2, dtype=np.float64)
-        k_max = np.zeros(bins+2, dtype=np.float64)
-        k_all = np.zeros(bins+2, dtype=np.float64)
-        Pk    = np.zeros(bins+2, dtype=np.float64)
-        k3    = np.sqrt((k2*np.sin(theta))**2 + (k2*np.cos(theta)+k1)**2)
+        bins      = theta.shape[0]
+        B         = np.zeros(bins,   dtype=np.float64)
+        Q         = np.zeros(bins,   dtype=np.float64)
+        triangles = np.zeros(bins,   dtype=np.float64)
+        k_min     = np.zeros(bins+2, dtype=np.float64)
+        k_max     = np.zeros(bins+2, dtype=np.float64)
+        k_all     = np.zeros(bins+2, dtype=np.float64)
+        Pk        = np.zeros(bins+2, dtype=np.float64)
+        k3        = np.sqrt((k2*np.sin(theta))**2 + (k2*np.cos(theta)+k1)**2)
         k_all[0] = k1;  k_all[1] = k2;  k_all[2:] = k3
 
         # define the structure hosting the IDs of the cells within the spherical
@@ -179,19 +180,20 @@ class Bk:
             Pk[j+2] = (Pk[j+2]/pairs)*(BoxSize/dims**2)**3
 
             # make the final sum and save bispectrum in B
-            B[j],triangles = 0.0, 0.0
+            B[j] = 0.0
             for kxx in range(dims):        
                 for kyy in range(dims):
                     for kzz in range(dims):
                         B[j] += (delta1[kxx,kyy,kzz]*delta2[kxx,kyy,kzz]*delta3[kxx,kyy,kzz])
-                        triangles += (I1[kxx,kyy,kzz]*I2[kxx,kyy,kzz]*I3[kxx,kyy,kzz])
-            B[j] = (B[j]/triangles)*(BoxSize**2/dims**3)**3                
+                        triangles[j] += (I1[kxx,kyy,kzz]*I2[kxx,kyy,kzz]*I3[kxx,kyy,kzz])
+            B[j] = (B[j]/triangles[j])*(BoxSize**2/dims**3)**3                
             Q[j] = B[j]/(Pk[0]*Pk[1]+Pk[0]*Pk[j+2]+Pk[1]*Pk[j+2])
     
-        self.B  = B
-        self.Q  = Q
-        self.k  = k_all
-        self.Pk = Pk
+        self.B         = B
+        self.triangles = triangles
+        self.Q         = Q
+        self.k         = k_all
+        self.Pk        = Pk
         print('Time to compute bispectrum = %.2f'%(time.time()-start))
 
 
