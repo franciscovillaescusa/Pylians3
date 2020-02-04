@@ -164,6 +164,9 @@ MASL.MA(pos,delta,BoxSize,MAS,W=weights)
 delta /= np.mean(delta, dtype=np.float64);  delta -= 1.0 
 ```
 
+Pylians provide more routines to work/create density fields. See [here](Density_field.md).
+
+
 ## <a id="auto_Pk"></a> Power spectrum
 The ingredients needed to compute the power spectrum are:
 
