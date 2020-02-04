@@ -34,8 +34,8 @@ class Bk:
                  
         start = time.time()
         cdef int kxx, kyy, kzz, kx, ky, kz, MAS_index
-        cdef int dims, dims2, middle, bins, i, j
-        cdef long ID
+        cdef int dims, middle, bins, i, j
+        cdef unsigned long ID, dims2
         cdef list numbers
         cdef double k, prefact, pairs
         cdef double MAS_corr[3]
@@ -80,7 +80,6 @@ class Bk:
         ## compute FFT of the field (change this for double precision) ##
         delta_k = PKL.FFT3Dr_f(delta,threads)
         #################################
-
 
         # do a loop over the independent modes.
         # compute k,k_par,k_per, mu for each mode. k's are in kF units
