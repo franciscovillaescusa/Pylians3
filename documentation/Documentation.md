@@ -13,7 +13,7 @@
 * # [Redshift space distortions](#RSD)
 * # [Integrals](#Integrals_P)
 * # [Smooth fields](#Smooth)
-* # [Miscellaneous](#Miscellaneous)
+* # [Miscellaneous](#Miscellaneous_P)
 * # [Contact](#Contact_P)
 
 
@@ -593,7 +593,7 @@ field_smoothed = SL.field_smoothing(field, W_k, threads)
 ```
 
 
-## <a id="Miscellaneous"></a>Miscellaneous
+## <a id="Miscellaneous_P"></a>Miscellaneous
 
 See this [page](miscellaneous.md) for a collection of different useful things.
 
