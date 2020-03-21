@@ -15,7 +15,7 @@ cd my_folder/
 find -type f \! -name SHA224SUMS -exec sha224sum \{\} \+ > SHA224SUMS
 ```
 
-The above command will create a file called SHA224SUMS with the checksums of all files in that folder. Transfer the folder to the Princeton machine (including the file SHA224SUMS). Check the integrity of the data by executing the following command:
+The above command will create a file called SHA224SUMS with the checksums of all files in that folder. Transfer the folder to the Princeton machine (including the file SHA224SUMS). Check the integrity of the data by executing the following command in the Princeton machine:
 
 ```sh
 sha224sum -c SHA224SUMS --quiet
