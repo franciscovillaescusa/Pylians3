@@ -8,14 +8,14 @@ Here we present a set of different things that we found useful in the past
 
 ## <a id="Checksums_P"></a> Checksums
 
-When transfering large amounts of data, or very important data, among machines, it is important to verify that the integrity of the data transfered. Checksums can be used for this. Say you have a folder that want to transfer from San Diego to Princeton. The way to do that is:
+When transfering large amounts of data, or very important data, among machines, it is important to verify that the integrity of the data transfered. Checksums can be used for this. Say you have a folder that want to transfer from San Diego to Princeton. The way to do that is as follows. In the San Diego machine type:
 
 ```sh
 cd my_folder/
 find -type f \! -name SHA224SUMS -exec sha224sum \{\} \+ > SHA224SUMS
 ```
 
-The above command will create a file called SHA224SUMS with the checksums of all files in that folder. Once that folder has been transfered to another machine, the integrity of the data can be checked by executing the following command:
+The above command will create a file called SHA224SUMS with the checksums of all files in that folder. Transfer the folder to the Princeton machine (including the file SHA224SUMS). Check the integrity of the data by executing the following command:
 
 ```sh
 sha224sum -c SHA224SUMS --quiet
