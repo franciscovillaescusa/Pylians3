@@ -2,9 +2,53 @@
   
 Here we present a set of different things that we found useful in the past
 
+* ## [mpi4py](#mpi4py_P)
 * ## [Checksums](#Checksums_P)
 * ## [Emacs](#Emacs_P)
 
+## <a id="mpi4py_P"></a> mpi4py
+
+Sometimes one needs to execute the same lines of code over many different cases. In this case, mpi can be used for a trivial parallelization. Below is an example on how to print a line over 1000 numbers with different cpus
+
+```python
+from mpi4py import MPI
+import numpy as np
+
+###### MPI DEFINITIONS ###### 
+comm   = MPI.COMM_WORLD
+nprocs = comm.Get_size()
+myrank = comm.Get_rank()
+
+files = 10000
+
+# find the numbers that each cpu will work with
+numbers = np.where(np.arange(files)%nprocs==myrank)[0]
+
+# main loop; each cpu only works on its subset
+for i in numbers:
+    print('Cpu %3d working with number %4d'%(myrank,i))
+```
+
+Sometimes each cpu does a part of a calculation, and we want to join the results of all the cpus into a single core. This joining can be adding, multiplying...etc the results of each core. Imagine that you have an array that need to be filled up with numbers. Instead of having a single cpu filling up the array, we want different cpus to do a fraction of the work and fill up the array but only with their partial numbers. The way to sum all partial results to obtain the full array is this:
+
+```python
+from mpi4py import MPI
+import numpy as np
+
+###### MPI DEFINITIONS ###### 
+comm   = MPI.COMM_WORLD
+nprocs = comm.Get_size()
+myrank = comm.Get_rank()
+
+partial_array = np.zeros(nprocs) #array with the partial results of each cpu
+total_array   = np.zeros(nprocs) #array with the overall results
+
+partial_array[myrank] = myrank #each cpu fill their array elements
+
+comm.Reduce(partial_array, total_array, root=0)
+
+print(myrank, partial_array, total_array)
+```
 
 ## <a id="Checksums_P"></a> Checksums
 
