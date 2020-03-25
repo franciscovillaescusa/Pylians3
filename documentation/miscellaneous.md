@@ -5,6 +5,7 @@ Here we present a set of different things that we found useful in the past
 * ## [mpi4py](#mpi4py_P)
 * ## [Checksums](#Checksums_P)
 * ## [Emacs](#Emacs_P)
+* ## [Slurm](#Slurm_P)
 
 ## <a id="mpi4py_P"></a> mpi4py
 
@@ -50,6 +51,12 @@ comm.Reduce(partial_array, total_array, root=0)
 print(myrank, partial_array, total_array)
 ```
 
+Sometimes it is needed to make sure that all cores are at the same point in a code. For that, use
+
+```python
+comm.Barrier()
+```
+
 ## <a id="Checksums_P"></a> Checksums
 
 When transfering large amounts of data, or very important data, among machines, it is important to verify that the integrity of the data transfered. Checksums can be used for this. Say you have a folder that want to transfer from San Diego to Princeton. The way to do that is as follows. In the San Diego machine type:
@@ -80,4 +87,18 @@ Thus, once the geometry that best fit the screen is found, it is enough to add t
 
 ```sh
 alias emacs="emacs --geometry=88x37"
+```
+
+## <a id="Slurm_P"></a> Slurm
+
+When I want to run a job in interactive mode I use this command to request 2 nodes and 5 cores per node for 24 hours
+
+```bash
+salloc -N 2 --ntasks-per-node 5 -t 24:00:00
+```
+
+This will allocate 10 cores. In order to run your code do
+
+```bash
+srun -n 10 python my_mpi_code.py
 ```
