@@ -4,6 +4,8 @@ Here we present a set of different things that we found useful in the past
 
 * ## [mpi4py](#mpi4py_P)
 * ## [Checksums](#Checksums_P)
+* ## [h5py](#h5py_P)
+* ## [bash](#bash_P)
 * ## [Emacs](#Emacs_P)
 * ## [Slurm](#Slurm_P)
 
@@ -73,6 +75,140 @@ sha224sum -c SHA224SUMS --quiet
 ```
 
 If nothing is printed out, the data has been properly transfered.
+
+## <a id="h5py_P"></a> h5py
+
+Some examples to remind myself the syntax of h5py:
+
+```python
+import numpy as np
+import h5py
+
+z = 3.0
+a = np.arange(10)
+
+# write a hdf5 file
+f = h5py.File('my_file_z=%.3f.hdf5'%z, 'w')
+f.create_dataset('Mass', data=a)
+f.close()
+
+# read hdf5 file
+f = h5py.File('M_HI_new_75_1820_z=%.3f.hdf5'%z, 'r')
+M_HI = f['M_HI'][:]
+M    = f['Mass'][:]
+R    = f['R'][:]
+f.close()
+```
+
+## <a id="bash_P"></a> bash
+
+Here are some examples on how to deal with if and loops in bash
+
+```sh
+#!/bin/bash
+
+dims=512
+do_RSD=1
+axis=0
+
+#name of the folders containing the snapshots
+snapshot_folder=('/scratch/villa/SAM/CDM/'       \
+                 '/scratch2/villa/SAM/NU0.3/'    \
+                 '/scratch2/villa/SAM/NU0.3s8/'  \
+                 '/scratch2/villa/SAM/NU0.6/'    \
+                 '/scratch2/villa/SAM/NU0.6s8/'  \
+                 '/scratch/villa/SAM/CDM/'       \
+                 '/scratch/villa/SAM/CDM/')
+
+#root of the files containing the galaxy catalogues
+root_catalogue=('LG_NCDM_' \
+                'LG_NU03_' \
+                'LG_N3s8_' \
+                'LG_NU06_' \
+                'LG_N6s8_' \
+                'LG_DC_N_' \
+                'LG_SA_N_')
+
+#name of the folders containing the 2PCF files
+root_f_out=('0.0/2PCF_RS_gal_0.0_z='      \
+            '0.3/2PCF_RS_gal_0.3_z='      \
+            '0.3s8/2PCF_RS_gal_0.3s8_z='  \
+            '0.6/2PCF_RS_gal_0.6_z='      \
+            '0.6s8/2PCF_RS_gal_0.6s8_z='  \
+            '0.0_DC/2PCF_RS_gal_0.0_z='   \
+            '0.0_SA/2PCF_RS_gal_0.0_z=')
+
+#redshifts
+z=('3.06.dat' '2.07.dat' '0.99.dat' '0.51.dat' '0.00.dat')
+
+#snapshots number corresponding to the above redshifts
+suffix_snapshot_CDM=('snap_026' 'snap_031' 'snap_040' 'snap_047' 'snap_062')
+suffix_snapshot=('snapdir_026/snap_026' \
+                 'snapdir_031/snap_031' \
+                 'snapdir_040/snap_040' \
+                 'snapdir_047/snap_047' \
+                 'snapdir_062/snap_062')
+
+
+#do a loop over the different cosmologies
+for i in ${!snapshot_folder[*]}
+do
+
+    #do a loop over the different redshifts for the same cosmology
+    for j in ${!z[*]}
+    do
+	
+	if [ "$i" == "0" -o "$i" -ge "5" ]; then
+	    snapshot_fname=${snapshot_folder[$i]}${suffix_snapshot_CDM[$j]}
+	else
+	    snapshot_fname=${snapshot_folder[$i]}${suffix_snapshot[$j]}
+	fi
+
+	f_cat=${root_catalogue[$i]}${z[$j]}
+	f_out=${root_f_out[$i]}${z[$j]}
+
+	echo $snapshot_fname
+	echo $f_cat
+	echo $f_out
+
+	mpirun -np 8 python correlation_function.py $snapshot_fname $f_cat $f_out $do_RSD $axis
+
+    done
+    echo ' '
+done
+```
+
+```bash
+#!/bin/bash
+
+
+#WAYS TO LOOP OVER THE ELEMENTS OF AN ARRAY
+
+array=('first' 'second' 'third' 'fourth') #array
+
+#print the number of elements in the array
+printf 'Number of elements in the array = %d \n\n' ${#array[*]}
+
+#print the elements in the array
+echo '###### array elements ######'
+for element in ${array[*]}
+do
+    echo $element
+done
+echo '############################'
+
+#print the elements in the array and their order
+printf '\n###### array elements ######\n'
+for i in ${!array[*]}
+do
+    printf 'element %d = %s\n' $i ${array[$i]}
+done
+printf '############################\n\n'
+
+echo ${array[*]}   #print all the elements of the array
+echo ${!array[*]}  #print the indexes of the array
+echo ${#array[*]}  #print the number of elements in the array
+```
 
 
 ## <a id="Emacs_P"></a> Emacs
