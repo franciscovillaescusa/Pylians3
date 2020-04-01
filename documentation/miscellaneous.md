@@ -281,6 +281,13 @@ This will allocate 10 cores. In order to run your code do
 srun -n 10 python my_mpi_code.py
 ```
 
+For the usage of 1 GPU in interactive mode I do:
+
+```bash
+salloc -N 1 -p gpu --gres=gpu:1 -c 1 --mem=100GB
+srun --pty bash -i 
+```
+
 ## <a id="fit_P"></a> fit
 
 An example on how to make fits using python and emcee
