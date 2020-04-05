@@ -433,7 +433,7 @@ class Pk:
 @cython.cdivision(False)
 @cython.wraparound(False)
 class Pk_plane:
-    def __init__(self,delta,BoxSize,MAS='CIC',threads=1):
+    def __init__(self,delta,BoxSize,MAS='CIC',threads=1,verbose=True):
 
         start = time.time()
         cdef int kxx, kyy, kx, ky, grid, middle, k_index, MAS_index
@@ -448,7 +448,7 @@ class Pk_plane:
 
         # find dimensions of delta: we assume is a (grid,grid) array
         # determine the different frequencies and the MAS_index
-        print('\nComputing power spectrum of the field...')
+        if verbose:  print('\nComputing power spectrum of the field...')
         grid = len(delta);  middle = grid//2
         kF,kN,kmax_par,kmax_per,kmax = frequencies_2D(BoxSize,grid)
         MAS_index = MAS_function(MAS)
@@ -497,7 +497,7 @@ class Pk_plane:
                 k2D[k_index]    += k
                 Pk2D[k_index]   += delta2
                 Nmodes[k_index] += 1.0
-        print('Time to complete loop = %.2f'%(time.time()-start2))
+        if verbose:  print('Time to complete loop = %.2f'%(time.time()-start2))
 
         # Pk2D. Check modes, discard DC mode bin and give units
         check_number_modes_2D(Nmodes,grid)
@@ -508,7 +508,7 @@ class Pk_plane:
         self.k  = np.asarray(k2D);  self.Nmodes = np.asarray(Nmodes)
         self.Pk = np.asarray(Pk2D)
 
-        print('Time taken = %.2f seconds'%(time.time()-start))
+        if verbose:  print('Time taken = %.2f seconds'%(time.time()-start))
 ################################################################################
 ################################################################################
 
