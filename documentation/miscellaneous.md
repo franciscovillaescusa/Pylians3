@@ -6,6 +6,7 @@ Here we present a set of different things that we found useful in the past
 * ## [Checksums](#Checksums_P)
 * ## [h5py](#h5py_P)
 * ## [argparse](#argparse_P)
+* ## [cython](cython_P)
 * ## [bash](#bash_P)
 * ## [Emacs](#Emacs_P)
 * ## [Slurm](#Slurm_P)
@@ -141,6 +142,15 @@ print(args.SFR)
 print(args.long_ids)
 ```
 
+## <a id="cython_P"></a> cython
+
+Sometimes it is very useful to visualize which pieces of the code are fully translated into c and which still have some part of python. Typing
+
+```sh
+cython -a my_file.pyx
+```
+
+will generate a html file with different intensities in yellow: from white (pure C) to dark yellow (full python).
 
 ## <a id="bash_P"></a> bash
 
