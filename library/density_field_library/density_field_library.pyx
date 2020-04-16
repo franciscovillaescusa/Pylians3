@@ -4,6 +4,7 @@ cimport numpy as np
 cimport cython 
 from libc.stdlib cimport rand,srand
 from libc.math cimport log,sqrt,sin,cos
+import Pk_library as PKL
 
 cdef extern from "limits.h":
     int INT_MAX
@@ -326,3 +327,99 @@ def CF_mocks(int dims, precision,
     time_taken = time.clock()-start
     print('delta(k) field generated\ntime taken =',time_taken,'seconds\n')
     return delta_k
+
+
+
+
+#####################################################################################
+#####################################################################################
+# grid ------------------> the code will return an image with grid x grid pixels
+# kf --------------------> array with the values of k for Pk
+# Pkf -------------------> array wiht the values of Pk
+# Rayleigh_sampling -----> whether Rayleight sampling modes amplitude or not
+# seed ------------------> random seed to generate the map
+@cython.boundscheck(False)
+@cython.cdivision(False)
+@cython.wraparound(False)
+def gaussian_field_image(int grid, float[:] kf, float[:] Pkf, int Rayleigh_sampling, 
+                         int seed, float BoxSize, threads, verbose=False):
+
+    cdef int k_bins, kxx, kyy, kx, ky, kxx_m, kyy_m, middle, lmin, lmax, l
+    cdef float kmod, Pk, phase, amplitude, real_part, imag_part 
+    cdef np.complex64_t value
+    cdef np.complex64_t  zero = 0.0+1j*0.0
+    cdef np.complex64_t[:,:] delta_k
+
+    cdef float prefac1 = 2.0*np.pi/BoxSize/float(INT_MAX)
+    cdef float prefac2 = 2.0*np.pi/BoxSize
+    cdef float constant1 = 1.0/float(INT_MAX)
+
+    start = time.time()
+    k_bins, middle = len(kf), grid//2
+
+    # define the density field in Fourier space
+    delta_k = np.zeros((grid, middle+1), dtype=np.complex64)
+
+    # initialize the random generator
+    srand(seed)
+    
+    #we make a loop over the indexes of the matrix delta_k(ii,jj,kk)
+    #but the vector k is given by \vec{k}=(kx,ky,kz)
+    for kxx in range(grid):
+        kx = (kxx-grid if (kxx>middle) else kxx)
+
+        for kyy in range(middle+1):
+            ky = (kyy-grid if (kyy>middle) else kyy)
+
+            # find the value of |k| of the mode
+            kmod = sqrt(kx*kx + ky*ky)*prefac2
+                
+            # interpolate to compute P(|k|)
+            lmin = 0;  lmax = k_bins-1
+            while (lmax-lmin>1):
+                l = (lmin+lmax)//2
+                if kf[l]<kmod:  lmin = l
+                else:           lmax = l
+            Pk = ((Pkf[lmax]-Pkf[lmin])/(kf[lmax]-kf[lmin])*\
+                  (kmod-kf[lmin]))+Pkf[lmin]           
+
+            #generate the mode random phase and amplitude
+            phase     = prefac1*rand()
+            amplitude = constant1*rand()
+            while (amplitude==0.0):   amplitude = constant1*rand()
+            if Rayleigh_sampling==1:  amplitude = sqrt(-log(amplitude))
+            else:                     amplitude = 1.0
+            amplitude *= sqrt(Pk)
+                
+            # get real and imaginary parts
+            real_part = amplitude*cos(phase)
+            imag_part = amplitude*sin(phase)
+
+            # fill the upper plane of the delta_k array
+            if delta_k[kxx,kyy]==zero:
+                value = (real_part+1j*imag_part)
+                delta_k[kxx,kyy] = value
+
+            # fill the bottom plane of the delta_k array
+            # if kx>0 then kxx=kx and -kx corresponds to grid-kx
+            # if kx<0 then kxx=grid-kx and -kx corresponds to kx
+            kxx_m = (grid-kx if (kx>0) else -kx)
+            kyy_m = (grid-ky if (ky>0) else -ky)
+            if delta_k[kxx_m,kyy_m]==zero:
+                value = (real_part-1j*imag_part)
+                delta_k[kxx_m,kyy_m] = value
+
+            # modes where delta(-k)==delta(k) have to be real
+            if (kxx_m==kxx) and (kyy_m==kyy):
+                delta_k[kxx,kyy].imag = 0.0
+                #print(kxx,kyy)            
+
+    # force this in case input Pk doesnt go to k=0
+    delta_k[0,0] = 0.0
+
+    time_taken = time.time()-start
+    if verbose:  
+        print('delta(k) field generated\ntime taken = %.5f seconds\n'%time_taken)
+    return PKL.IFFT2Dr_f(delta_k, threads)
+#####################################################################################
+#####################################################################################
