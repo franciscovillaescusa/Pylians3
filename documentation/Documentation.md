@@ -11,6 +11,7 @@
 * # [Plots](#Plots_df)
 * # [Cosmology](#Cosmology_P)
 * # [Redshift space distortions](#RSD)
+* # [Gaussian density fields](#Gaussian_fields_P)
 * # [Integrals](#Integrals_P)
 * # [Smooth fields](#Smooth)
 * # [Miscellaneous](#Miscellaneous_P)
@@ -487,6 +488,39 @@ Pylians provide a simple routine to displace particle positions from real-space 
 import redshift_space_library as RSL
 
 RSL.pos_redshift_space(pos, vel, BoxSize, Hubble, redshift, axis)
+```
+
+## <a id="Gaussian_fields_P"></a> Gaussian density fields
+
+Pylians provide a few routines to generate Gaussian density fields. The ingredients needed are:
+
+- ```grid```. The generated Gaussian density field will have grid x grid pixels.
+- ```k``` . 1D float32 numpy array containing the k-values of the input power spectrum.
+- ```Pk```. 1D float32 numpy array containing the Pk-values of the input power spectrum.
+- ```Rayleigh_sampling```. Where Rayleigh sampling the modes amplitudes when generating the Gaussian field. If ```Rayleigh_sampling=0``` the Gaussian field will not have cosmic variance. Set ```Rayleigh_sampling=1``` for standard Gaussian density fields.
+- ```seed```. Integer for the random seed of the map.
+- ```BoxSize```. Size of the region over which to generate the field. Units should be compatible with those of ```Pk```.
+- ```threads```. Number of openmp threads. Only used when FFT the field from Fourier space to configuration space.
+- ```verbose```. Whether output some information.
+
+```python
+import numpy as np
+import density_field_library as DFL
+
+grid              = 128
+BoxSize           = 1000.0 #Mpc/h
+seed              = 1
+Rayleigh_sampling = 0
+threads           = 1
+verbose           = True
+
+# read power spectrum; k and Pk have to be floats, not doubles 
+k, Pk = np.loadtxt('my_Pk.txt', unpack=True)
+k, Pk = k.astype(np.float32), Pk.astype(np.float32)
+
+# generate the Gaussian density field
+df = DFL.gaussian_field_image(grid, k, Pk, Rayleigh_sampling, seed, 
+     			      BoxSize, threads, verbose)
 ```
 
 
