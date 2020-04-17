@@ -8,7 +8,7 @@ import Pk_library as PKL
 
 cdef extern from "limits.h":
     int INT_MAX
-
+    int RAND_MAX
 
 
 def theta(np.ndarray[np.complex128_t, ndim=3] Vx_k,Vy_k,Vz_k,
@@ -346,13 +346,12 @@ def gaussian_field_image(int grid, float[:] kf, float[:] Pkf, int Rayleigh_sampl
 
     cdef int k_bins, kxx, kyy, kx, ky, kxx_m, kyy_m, middle, lmin, lmax, l
     cdef float kmod, Pk, phase, amplitude, real_part, imag_part 
-    cdef np.complex64_t value
-    cdef np.complex64_t  zero = 0.0+1j*0.0
+    cdef np.complex64_t  zero = 0.0 + 1j*0.0
     cdef np.complex64_t[:,:] delta_k
 
-    cdef float prefac1 = 2.0*np.pi/BoxSize/float(INT_MAX)
+    cdef float prefac1 = 2.0*np.pi/float(RAND_MAX)
     cdef float prefac2 = 2.0*np.pi/BoxSize
-    cdef float constant1 = 1.0/float(INT_MAX)
+    cdef float constant1 = 1.0/float(RAND_MAX)
 
     start = time.time()
     k_bins, middle = len(kf), grid//2
@@ -363,10 +362,11 @@ def gaussian_field_image(int grid, float[:] kf, float[:] Pkf, int Rayleigh_sampl
     # initialize the random generator
     srand(seed)
     
-    #we make a loop over the indexes of the matrix delta_k(ii,jj,kk)
-    #but the vector k is given by \vec{k}=(kx,ky,kz)
+    # we make a loop over the indexes of the matrix delta_k(kxx,kyy)
+    # but the vector k is given by \vec{k}=(kx,ky)
     for kxx in range(grid):
         kx = (kxx-grid if (kxx>middle) else kxx)
+        kxx_m = (grid-kx if (kx>0) else -kx) #index corresponding to -kx
 
         for kyy in range(middle+1):
             ky = (kyy-grid if (kyy>middle) else kyy)
@@ -382,6 +382,7 @@ def gaussian_field_image(int grid, float[:] kf, float[:] Pkf, int Rayleigh_sampl
                 else:           lmax = l
             Pk = ((Pkf[lmax]-Pkf[lmin])/(kf[lmax]-kf[lmin])*\
                   (kmod-kf[lmin]))+Pkf[lmin]           
+            Pk = Pk*(grid**2/BoxSize)**2 #remove units. Density field shouldnt have units
 
             #generate the mode random phase and amplitude
             phase     = prefac1*rand()
@@ -397,25 +398,40 @@ def gaussian_field_image(int grid, float[:] kf, float[:] Pkf, int Rayleigh_sampl
 
             # fill the upper plane of the delta_k array
             if delta_k[kxx,kyy]==zero:
-                value = (real_part+1j*imag_part)
-                delta_k[kxx,kyy] = value
+                delta_k[kxx,kyy] = real_part + 1j*imag_part
 
-            # fill the bottom plane of the delta_k array
-            # if kx>0 then kxx=kx and -kx corresponds to grid-kx
-            # if kx<0 then kxx=grid-kx and -kx corresponds to kx
-            kxx_m = (grid-kx if (kx>0) else -kx)
-            kyy_m = (grid-ky if (ky>0) else -ky)
-            if delta_k[kxx_m,kyy_m]==zero:
-                value = (real_part-1j*imag_part)
-                delta_k[kxx_m,kyy_m] = value
-
-            # modes where delta(-k)==delta(k) have to be real
-            if (kxx_m==kxx) and (kyy_m==kyy):
-                delta_k[kxx,kyy].imag = 0.0
-                #print(kxx,kyy)            
+                # fill the bottom plane of the delta_k array
+                # we do this ONLY if we fill up the upper plane
+                # we need to satisfy delta(-k) = delta*(k)
+                # k=(kx,ky)---> -k=(-kx,-ky). For ky!=0 or ky!=middle
+                # the vector -k is not in memory, so we dont care
+                # thus, we only care when ky==0 or ky==middle
+                if ky==0 or ky==middle: #for these points: -ky=ky
+                    if delta_k[kxx_m,kyy]==zero:
+                        delta_k[kxx_m,kyy] = real_part - 1j*imag_part
+                    if kxx_m==kxx:  #when k=-k delta(k) should be real
+                        delta_k[kxx,kyy] = amplitude + 1j*0.0
 
     # force this in case input Pk doesnt go to k=0
     delta_k[0,0] = 0.0
+
+    """
+    # This is just to save the values of delta(k) to a file
+    # mainly for debugging purposes
+    for kxx in range(grid):
+        kx = (kxx-grid if (kxx>middle) else kxx)
+
+        for kyy in range(middle+1):
+            ky = (kyy-grid if (kyy>middle) else kyy)
+
+            # find the value of |k| of the mode
+            kmod = sqrt(kx*kx + ky*ky)*prefac2
+
+            f = open('borrar.txt','a')
+            f.write('%.3e %.3e\n'%(kmod,sqrt(delta_k[kxx,kyy].real**2 + \
+                                             delta_k[kxx,kyy].imag**2)))
+            f.close()
+    """
 
     time_taken = time.time()-start
     if verbose:  
