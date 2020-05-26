@@ -493,7 +493,7 @@ RSL.pos_redshift_space(pos, vel, BoxSize, Hubble, redshift, axis)
 
 ## <a id="Gaussian_fields_P"></a> Gaussian density fields
 
-Pylians provide a few routines to generate Gaussian density fields. The ingredients needed are:
+Pylians provide a few routines to generate Gaussian density fields either in 2D or 3D. The ingredients needed are:
 
 - ```grid```. The generated Gaussian density field will have grid x grid pixels.
 - ```k``` . 1D float32 numpy array containing the k-values of the input power spectrum.
@@ -519,9 +519,13 @@ verbose           = True
 k, Pk = np.loadtxt('my_Pk.txt', unpack=True)
 k, Pk = k.astype(np.float32), Pk.astype(np.float32)
 
-# generate the Gaussian density field
-df = DFL.gaussian_field_image(grid, k, Pk, Rayleigh_sampling, seed, 
+# generate a 2D Gaussian density field
+df_2D = DFL.gaussian_field_2D(grid, k, Pk, Rayleigh_sampling, seed, 
      			      BoxSize, threads, verbose)
+
+# generate a 3D Gaussian density field
+df_3D = DFL.gaussian_field_3D(grid, k, Pk, Rayleigh_sampling, seed, 
+       			      BoxSize, threads, verbose)
 ```
 
 

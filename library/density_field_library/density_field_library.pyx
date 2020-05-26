@@ -341,8 +341,8 @@ def CF_mocks(int dims, precision,
 @cython.boundscheck(False)
 @cython.cdivision(False)
 @cython.wraparound(False)
-def gaussian_field_image(int grid, float[:] kf, float[:] Pkf, int Rayleigh_sampling, 
-                         int seed, float BoxSize, threads, verbose=False):
+def gaussian_field_2D(int grid, float[:] kf, float[:] Pkf, int Rayleigh_sampling, 
+                      int seed, float BoxSize, threads, verbose=False):
 
     cdef int k_bins, kxx, kyy, kx, ky, kxx_m, kyy_m, middle, lmin, lmax, l
     cdef float kmod, Pk, phase, amplitude, real_part, imag_part 
@@ -531,24 +531,6 @@ def gaussian_field_3D(int grid, float[:] kf, float[:] Pkf, int Rayleigh_sampling
 
     # force this in case input Pk doesnt go to k=0
     delta_k[0,0,0] = zero
-
-    """
-    # This is just to save the values of delta(k) to a file
-    # mainly for debugging purposes
-    for kxx in range(grid):
-        kx = (kxx-grid if (kxx>middle) else kxx)
-
-        for kyy in range(middle+1):
-            ky = (kyy-grid if (kyy>middle) else kyy)
-
-            # find the value of |k| of the mode
-            kmod = sqrt(kx*kx + ky*ky)*prefac2
-
-            f = open('borrar.txt','a')
-            f.write('%.3e %.3e\n'%(kmod,sqrt(delta_k[kxx,kyy].real**2 + \
-                                             delta_k[kxx,kyy].imag**2)))
-            f.close()
-    """
 
     time_taken = time.time()-start
     if verbose:  
