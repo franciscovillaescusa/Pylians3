@@ -439,3 +439,120 @@ def gaussian_field_image(int grid, float[:] kf, float[:] Pkf, int Rayleigh_sampl
     return PKL.IFFT2Dr_f(delta_k, threads)
 #####################################################################################
 #####################################################################################
+
+#####################################################################################
+#####################################################################################
+# grid ------------------> the code will return a cube with grid x grid x grid voxels
+# kf --------------------> array with the values of k for Pk
+# Pkf -------------------> array wiht the values of Pk
+# Rayleigh_sampling -----> whether Rayleight sampling modes amplitude or not
+# seed ------------------> random seed to generate the map
+# BoxSize ---------------> Size of the periodic box. Units in agreement with Pk
+# threads ---------------> number of openmp threads, only for FFT
+# verbose ---------------> print information about the status of the calculation
+@cython.boundscheck(False)
+@cython.cdivision(False)
+@cython.wraparound(False)
+def gaussian_field_3D(int grid, float[:] kf, float[:] Pkf, int Rayleigh_sampling, 
+                      int seed, float BoxSize, threads, verbose=False):
+
+    cdef int k_bins, kxx, kyy, kzz, kx, ky, kz, kxx_m, kyy_m, kzz_m
+    cdef int middle, lmin, lmax, l
+    cdef float kmod, Pk, phase, amplitude, real_part, imag_part 
+    cdef np.complex64_t zero = 0.0 + 1j*0.0
+    cdef np.complex64_t[:,:,:] delta_k
+
+    cdef float phase_prefac = 2.0*np.pi/float(RAND_MAX)
+    cdef float k_prefac     = 2.0*np.pi/BoxSize
+    cdef float inv_max_rand = 1.0/float(RAND_MAX)
+
+    start = time.time()
+    k_bins, middle = len(kf), grid//2
+
+    # define the density field in Fourier space
+    delta_k = np.zeros((grid, grid, middle+1), dtype=np.complex64)
+
+    # initialize the random generator
+    srand(seed)
+    
+    # we make a loop over the indexes of the matrix delta_k(kxx,kyy,kzz)
+    # but the vector k is given by \vec{k}=(kx,ky,kz)
+    for kxx in range(grid):
+        kx = (kxx-grid if (kxx>middle) else kxx)
+        kxx_m = (grid-kx if (kx>0) else -kx) #index corresponding to -kx
+
+        for kyy in range(grid):
+            ky = (kyy-grid if (kyy>middle) else kyy)
+            kyy_m = (grid-ky if (ky>0) else -ky) #index corresponding to -ky
+
+            for kzz in range(middle+1):
+                kz = (kzz-grid if (kzz>middle) else kzz)
+
+                # find the value of |k| of the mode
+                kmod = sqrt(kx*kx + ky*ky + kz*kz)*k_prefac
+                
+                # interpolate to compute P(|k|)
+                lmin = 0;  lmax = k_bins-1
+                while (lmax-lmin>1):
+                    l = (lmin+lmax)//2
+                    if kf[l]<kmod:  lmin = l
+                    else:           lmax = l
+                Pk = ((Pkf[lmax]-Pkf[lmin])/(kf[lmax]-kf[lmin])*\
+                      (kmod-kf[lmin]))+Pkf[lmin]           
+                Pk = Pk*(grid**2/BoxSize)**3 #remove units
+
+                #generate the mode random phase and amplitude
+                phase     = phase_prefac*rand()
+                amplitude = inv_max_rand*rand()
+                while (amplitude==0.0):   amplitude = inv_max_rand*rand()
+                if Rayleigh_sampling==1:  amplitude = sqrt(-log(amplitude))
+                else:                     amplitude = 1.0
+                amplitude *= sqrt(Pk)
+                
+                # get real and imaginary parts
+                real_part = amplitude*cos(phase)
+                imag_part = amplitude*sin(phase)
+
+                # fill the upper plane of the delta_k array
+                if delta_k[kxx,kyy,kzz]==zero:
+                    delta_k[kxx,kyy,kzz] = real_part + 1j*imag_part
+
+                    # fill the bottom plane of the delta_k array
+                    # we do this ONLY if we fill up the upper plane
+                    # we need to satisfy delta(-k) = delta*(k)
+                    # k=(kx,ky,kz)---> -k=(-kx,-ky,-kz). For kz!=0 or kz!=middle
+                    # the vector -k is not in memory, so we dont care
+                    # thus, we only care when kz==0 or kz==middle
+                    if kz==0 or kz==middle: #for these points: -kz=kz
+                        if delta_k[kxx_m,kyy_m,kzz]==zero:
+                            delta_k[kxx_m,kyy_m,kzz] = real_part - 1j*imag_part
+                        if kxx_m==kxx and kyy_m==kyy: #when k=-k delta(k) should be real
+                            delta_k[kxx,kyy,kzz] = amplitude + 1j*0.0
+
+    # force this in case input Pk doesnt go to k=0
+    delta_k[0,0,0] = zero
+
+    """
+    # This is just to save the values of delta(k) to a file
+    # mainly for debugging purposes
+    for kxx in range(grid):
+        kx = (kxx-grid if (kxx>middle) else kxx)
+
+        for kyy in range(middle+1):
+            ky = (kyy-grid if (kyy>middle) else kyy)
+
+            # find the value of |k| of the mode
+            kmod = sqrt(kx*kx + ky*ky)*prefac2
+
+            f = open('borrar.txt','a')
+            f.write('%.3e %.3e\n'%(kmod,sqrt(delta_k[kxx,kyy].real**2 + \
+                                             delta_k[kxx,kyy].imag**2)))
+            f.close()
+    """
+
+    time_taken = time.time()-start
+    if verbose:  
+        print('delta(k) field generated\ntime taken = %.5f seconds\n'%time_taken)
+    return PKL.IFFT3Dr_f(delta_k, threads)
+#####################################################################################
+#####################################################################################
