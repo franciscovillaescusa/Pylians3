@@ -251,6 +251,7 @@ def IFFT2Dr_d(np.complex128_t[:,:] a, int threads):
 # MAS ---------> mass assignment scheme used to compute density field
 #                needed to correct modes amplitude
 # threads -----> number of threads (OMP) used to make the FFTW
+# verbose------> whether print some information on the status/progress
 # P_1D(k_par) = \int d^2k_per/(2pi)^2 P_3D(k_par,k_per)
 # we approximate the 2D integral by the average of the modes sampled by the 
 # field and we carry it out using k_per modes such as |k|<kN. The perpendicular
@@ -261,7 +262,7 @@ def IFFT2Dr_d(np.complex128_t[:,:] a, int threads):
 @cython.cdivision(False)
 @cython.wraparound(False)
 class Pk:
-    def __init__(self,delta,BoxSize,int axis=2,MAS='CIC',threads=1):
+    def __init__(self,delta,BoxSize,int axis=2,MAS='CIC',threads=1,verbose=True):
 
         start = time.time()
         cdef int kxx, kyy, kzz, kx, ky, kz,dims, middle, k_index, MAS_index
@@ -278,7 +279,7 @@ class Pk:
 
         # find dimensions of delta: we assume is a (dims,dims,dims) array
         # determine the different frequencies and the MAS_index
-        print('\nComputing power spectrum of the field...')
+        if verbose:  print('\nComputing power spectrum of the field...')
         dims = len(delta);  middle = dims//2
         kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,dims)
         MAS_index = MAS_function(MAS)
@@ -376,7 +377,7 @@ class Pk:
                     Pk3D[k_index,2]   += (delta2*(35.0*mu2*mu2 - 30.0*mu2 + 3.0)/8.0)
                     Pkphase[k_index]  += (phase*phase)
                     Nmodes3D[k_index] += 1.0
-        print('Time to complete loop = %.2f'%(time.time()-start2))
+        if verbose:  print('Time to complete loop = %.2f'%(time.time()-start2))
 
         # Pk1D. Discard DC mode bin and give units
         # the perpendicular modes sample an area equal to pi*kmax_per^2
@@ -417,7 +418,7 @@ class Pk:
         self.k3D = np.asarray(k3D);  self.Nmodes3D = np.asarray(Nmodes3D)
         self.Pk = np.asarray(Pk3D);  self.Pkphase = Pkphase
 
-        print('Time taken = %.2f seconds'%(time.time()-start))
+        if verbose:  print('Time taken = %.2f seconds'%(time.time()-start))
 ################################################################################
 ################################################################################
 
