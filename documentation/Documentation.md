@@ -114,7 +114,7 @@ delta = MASL.density_field_gadget(snapshot, ptypes, grid, MAS, do_RSD, axis)
 delta /= np.mean(delta, dtype=np.float64);  delta -= 1.0
 ```
 
-Pylians can also be used to compute the power spectrum of a set of particles that are not in gadget format. An example is this
+Pylians can also be used to compute the density field of a set of particles that are not in gadget format. An example is this
 
 ```python
 import numpy as np
@@ -177,13 +177,14 @@ The ingredients needed to compute the power spectrum are:
 - ```axis```. Axis along which compute the quadrupole, hexadecapole and the 2D power spectrum. If the field is in real-space set ```axis=0```. If the field is in redshift-space set ```axis=0```, ```axis=1``` or ```axis=2``` if the redshift-space distortions have been placed along the x-axis, y-axis or z-axis, respectively. 
 - ```MAS```. Mass-assignment scheme used to generate the density field, if any. Possible options are ```'NGP'```, ```'CIC'```, ```'TSC'```, ```'PCS'```.  If the density field has not been generated with any of these set it to ```'None'```.
 - ```threads```. Number of openmp threads to be used.
+- ```verbose```. Whether print information on the status/progress of the calculation: True or False
 
 The power spectrum can be computed as:
 
 ```python
 import Pk_library as PKL
 
-Pk = PKL.Pk(delta, BoxSize, axis, MAS, threads)
+Pk = PKL.Pk(delta, BoxSize, axis, MAS, threads, verbose)
 ```
 
 ```Pk``` is a python class containing the 1D, 2D and 3D power spectra, that can be retrieved with
