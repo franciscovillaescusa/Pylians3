@@ -14,7 +14,7 @@ Imagine that a 3D density field ```field``` is given. The value of that field at
 ```python
 import MAS_library as MASL
 
-CIC_interp(field, BoxSize, pos, density_interpolated)
+MASL.CIC_interp(field, BoxSize, pos, density_interpolated)
 ```
 
 ### Hydrodynamic interpolations
