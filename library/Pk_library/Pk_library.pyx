@@ -23,6 +23,9 @@ from cpython cimport bool
 # Pk_plane(delta,BoxSize,MAS='CIC',threads=1)
 #  k, Pk, Nmodes
 
+# XPk_plane(delta1,delta2,BoxSize,MAS1,MAS2,threads=1)
+#  k, XPk, Nmodes
+
 # Pk_theta(Vx,Vy,Vz,BoxSize,axis=2,MAS='CIC',threads=1)
 #   [k,Pk_theta,Nmodes]
 
@@ -790,6 +793,149 @@ class XPk:
 
         self.k3D = np.asarray(k3D);  self.Nmodes3D = np.asarray(Nmodes3D)
         self.Pk = np.asarray(Pk3D);  self.XPk = np.asarray(PkX3D)
+
+        print('Time taken = %.2f seconds'%(time.time()-start))
+################################################################################
+################################################################################
+
+################################################################################
+################################################################################
+# This routine computes the auto- and cross-power spectra of two images
+# delta -------> list with the density fields: [delta1,delta2]
+# each density field should be a: (dims,dims) numpy array
+# BoxSize -----> size of the cubic density field
+# MAS ---------> list with the mass assignment scheme used to compute density 
+# fields: ['CIC','PCS']
+# threads -----> number of threads (OMP) used to make the FFTW
+@cython.boundscheck(False)
+@cython.cdivision(False)
+@cython.wraparound(False)
+class XPk_plane:
+    def __init__(self, delta1, delta2, BoxSize, MAS1=None, MAS2=None, threads=1):
+
+        start = time.time()
+        cdef int grid, middle, fields, i, j
+        cdef int index, kxx, kyy, kx, ky, k_index
+        cdef int kmax_par, kmax_per, kmax
+        cdef double k, prefact
+        cdef double delta_2, deltaX_2, fact
+        ####### change this for double precision ######
+        cdef float MAS_factor
+        cdef np.complex64_t[:,::1] delta1_k,delta2_k
+        ###############################################
+        cdef np.int32_t[::1] MAS_index
+        cdef np.float64_t[:,::1] MAS_corr
+        cdef np.float64_t[::1] real_part, imag_part, k2D, Nmodes2D, XPk2D
+        cdef np.float64_t[:,::1] Pk2D
+
+        print('\nComputing power spectra of the fields...')
+
+        # find the number and dimensions of the density fields
+        # we assume the density fields are (grid,grid) arrays
+        grid = delta1.shape[0];  middle = grid//2;  fields = 2
+
+        # check that the dimensions of the 2 fields are the same
+        if delta1.shape[0]!=delta2.shape[1]:
+            raise Exception('Images have different grid sizes!!!')
+
+        # find the different relevant frequencies
+        kF,kN,kmax_par,kmax_per,kmax = frequencies_2D(BoxSize,grid)
+
+        # define and fill the MAS_corr and MAS_index arrays
+        MAS_corr  = np.ones((fields,2), dtype=np.float64)
+        MAS_index = np.zeros(2,         dtype=np.int32)
+        MAS_index[0] = MAS_function(MAS1)
+        MAS_index[1] = MAS_function(MAS2)
+
+        # define the real_part and imag_part arrays
+        real_part = np.zeros(fields, dtype=np.float64)
+        imag_part = np.zeros(fields, dtype=np.float64)
+
+        ## compute FFT of the fields (change this for double precision) ##
+        delta1_k = FFT2Dr_f(delta1,threads)
+        delta2_k = FFT2Dr_f(delta2,threads)
+        print('Time FFTS = %.2f'%(time.time()-start))
+        #################################
+
+        # define arrays containing k2D, Pk2D,PkX2D & Nmodes2D. We need kmax+1
+        # bins since the mode (middle,middle) has an index = kmax.
+        # We define the arrays in this way to benefit of row-major
+        k2D      = np.zeros(kmax+1,          dtype=np.float64)
+        Pk2D     = np.zeros((kmax+1,fields), dtype=np.float64)
+        PkX2D    = np.zeros(kmax+1,          dtype=np.float64)
+        Nmodes2D = np.zeros(kmax+1,          dtype=np.float64)
+
+        # do a loop over the independent modes.
+        # compute k,k_par,k_per, mu for each mode. k's are in kF units
+        start2 = time.time();  prefact = np.pi/grid
+        for kxx in range(grid):
+            kx = (kxx-grid if (kxx>middle) else kxx)
+            MAS_corr[0,0] = MAS_correction(prefact*kx,MAS_index[0])
+            MAS_corr[1,0] = MAS_correction(prefact*kx,MAS_index[1])
+
+            for kyy in range(middle+1): #ky=[0,1,..,middle] --> ky>0
+                ky = (kyy-grid if (kyy>middle) else kyy)
+                MAS_corr[0,1] = MAS_correction(prefact*ky,MAS_index[0])
+                MAS_corr[1,1] = MAS_correction(prefact*ky,MAS_index[1])
+
+                # ky=0 and ky=middle planes are special
+                if ky==0 or (ky==middle and grid%2==0):
+                    if kx<0: continue
+
+                # compute |k| of the mode and its integer part
+                k       = sqrt(kx*kx + ky*ky)
+                k_index = <int>k
+
+                ####### fill the general arrays #########
+                k2D[k_index]      += k
+                Nmodes2D[k_index] += 1.0
+                #########################################
+
+                #### correct modes amplitude for MAS ####
+                MAS_factor = MAS_corr[0,0]*MAS_corr[0,1]
+                delta1_k[kxx,kyy] = delta1_k[kxx,kyy]*MAS_factor
+
+                MAS_factor = MAS_corr[1,0]*MAS_corr[1,1]
+                delta2_k[kxx,kyy] = delta2_k[kxx,kyy]*MAS_factor
+
+                real_part[0] = delta1_k[kxx,kyy].real
+                imag_part[0] = delta1_k[kxx,kyy].imag
+                real_part[1] = delta2_k[kxx,kyy].real
+                imag_part[1] = delta2_k[kxx,kyy].imag
+
+                ########## compute auto-P(k) ########
+                for i in range(fields):
+                    delta_2 = real_part[i]*real_part[i] +\
+                              imag_part[i]*imag_part[i]
+
+                    # Pk2D
+                    Pk2D[k_index,i] += delta_2
+                #########################################
+
+                ####### compute XPk for each pair #######
+                deltaX_2 = real_part[0]*real_part[1] +\
+                           imag_part[0]*imag_part[1]            
+
+                # XPk2D
+                PkX2D[k_index] += deltaX_2
+                #########################################
+
+        print('Time loop = %.2f'%(time.time()-start2))
+        fact = (BoxSize/grid**2)**3
+
+        # Pk2D. Check modes, discard DC mode bin and give units
+        # we need to multiply the multipoles by (2*ell + 1)
+        k2D  = k2D[1:];  Nmodes2D = Nmodes2D[1:];  
+        Pk2D = Pk2D[1:,:];  PkX2D = PkX2D[1:]
+        for i in range(len(k2D)):
+            k2D[i] = (k2D[i]/Nmodes2D[i])*kF
+            for j in range(fields):
+                Pk2D[i,j] = (Pk2D[i,j]/Nmodes2D[i])*fact
+            PkX2D[i] = (PkX2D[i]/Nmodes2D[i])*fact
+
+        self.k = np.asarray(k2D);    self.Nmodes = np.asarray(Nmodes2D)
+        self.Pk = np.asarray(Pk2D);  self.XPk = np.asarray(PkX2D)
+        self.r  = self.XPk/np.sqrt(self.Pk[:,0]*self.Pk[:,1])
 
         print('Time taken = %.2f seconds'%(time.time()-start))
 ################################################################################
