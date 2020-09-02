@@ -320,7 +320,7 @@ theta   = np.linspace(0, np.pi, 25) #array with the angles between k1 and k2
 Bk = PKL.Bk(delta, BoxSize, k1, k2, theta, MAS, threads)
 Bk = Bk.B     #bispectrum
 Qk = Bk.Q     #reduced bispectrum
-k  = Bk.k_all #k-bins for power spectrum
+k  = Bk.k     #k-bins for power spectrum
 Pk = Bk.Pk    #power spectrum
 ```
 
