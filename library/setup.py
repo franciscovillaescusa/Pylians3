@@ -9,8 +9,7 @@ import numpy
 
 ext_modules = [
     Extension("MAS_library.MAS_library", ["MAS_library/MAS_library.pyx",
-                                          "MAS_library/MAS_c.c",
-                                          "MAS_library/field_properties.pyx"],
+                                          "MAS_library/MAS_c.c"],
         extra_compile_args=['-O3','-ffast-math','-march=native','-fopenmp'],
               extra_link_args=['-fopenmp'], libraries=['m']),
 
@@ -19,6 +18,9 @@ ext_modules = [
 
     Extension("Pk_library.bispectrum_library",
         ["Pk_library/bispectrum_library.pyx"]),
+
+    Extension("MAS_library.field_properties",
+        ["MAS_library/field_properties.pyx"]),
 
     Extension("redshift_space_library.redshift_space_library", 
               ["redshift_space_library/redshift_space_library.pyx"]),
