@@ -55,6 +55,8 @@ python Tests/import_libraries.py
 ```
 If no output is produced, everything went fine.
 
+For installation on a mac, see [this](https://github.com/franciscovillaescusa/Pylians3/blob/master/documentation/Mac.md).
+
 ## Usage
 
 The most updated documentation with examples can be found [here](https://github.com/franciscovillaescusa/Pylians3/blob/master/documentation/Documentation.md).
