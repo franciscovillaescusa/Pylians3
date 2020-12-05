@@ -22,8 +22,17 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    :caption: Installation
 
    linux
-   mac   
+   mac
 
+.. toctree:: 
+   :maxdepth: 2
+   :caption: Density fields
+
+   standard_fields
+   marked_fields
+   field_interpolation
+   hydro_sims_fields
+	     
 .. toctree::
    :maxdepth: 2
    :caption: Power spectrum
@@ -32,3 +41,9 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    xpk
    mpk
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Other
+
+   license
+   contact
