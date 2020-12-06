@@ -50,6 +50,7 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    :maxdepth: 2
    :caption: Miscellaneous
 
+   plots
    cosmology
    gaussian_fields
    integrals
