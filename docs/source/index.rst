@@ -24,6 +24,7 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    linux
    mac
 
+.. _density_fields:
 .. toctree:: 
    :maxdepth: 2
    :caption: Density fields
@@ -36,16 +37,19 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
 	     
 .. toctree::
    :maxdepth: 2
-   :caption: Power spectrum
+   :caption: Functionalities
 
    pk
-   xpk
-   mpk
-
+   Bk
+   voids
+   smoothing
+   RSD
+      
 .. toctree:: 
    :maxdepth: 2
-   :caption: miscellaneous
+   :caption: Miscellaneous
 
+   cosmology
    gaussian_fields
    integrals
 
