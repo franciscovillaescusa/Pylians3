@@ -39,7 +39,7 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    :maxdepth: 2
    :caption: Functionalities
 
-   pk
+   Pk
    xi
    Bk
    voids

@@ -1,3 +1,5 @@
+.. _smoothing: 
+
 *********
 Smoothing
 *********
