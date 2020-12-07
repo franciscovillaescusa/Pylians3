@@ -45,6 +45,10 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    voids
    smoothing
    RSD
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Neutral hydrogen
       
 .. toctree:: 
    :maxdepth: 2
@@ -54,6 +58,7 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    cosmology
    gaussian_fields
    integrals
+   gadget
 
 .. toctree::
    :maxdepth: 2
