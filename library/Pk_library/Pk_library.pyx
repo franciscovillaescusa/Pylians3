@@ -1818,8 +1818,7 @@ def correct_MAS(delta,BoxSize,MAS='CIC',threads=1):
 @cython.boundscheck(False)
 @cython.cdivision(True)
 @cython.wraparound(False)
-def expected_Pk(np.float32_t[:] k_in, np.float32_t[:] Pk_in, 
-                float BoxSize, int dims):
+def expected_Pk(k_input, Pk_input, float BoxSize, int dims):
 
     cdef int k_len, i, j, bins
     cdef int kx, kxx, ky, kyy, kz, kzz, middle, k_index
@@ -1827,12 +1826,19 @@ def expected_Pk(np.float32_t[:] k_in, np.float32_t[:] Pk_in,
     cdef float kmin_in, kmax_in, deltak
     cdef np.float64_t[::1] k3D, Pk3D, Nmodes3D
     cdef np.float32_t[::1] k_in_interp, Pk_in_interp
+    cdef np.float32_t[:] k_in, Pk_in
 
     start2 = time.time()
 
     middle = dims//2
     kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,dims)
     bins = 750 #number of bins in the interpolated k_input,Pk_input
+
+    k_in  = np.zeros(k_input.shape[0],  dtype=np.float32)
+    Pk_in = np.zeros(Pk_input.shape[0], dtype=np.float32)
+    for i in range(k_in.shape[0]):
+        k_in[i]  = k_input[i]
+        Pk_in[i] = Pk_input[i]
 
     # check if input Pk is sorted
     k_len = k_in.shape[0]
