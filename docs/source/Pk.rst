@@ -182,3 +182,33 @@ The above routines can be used for standard fields or for marked fields. The scr
    # save 3D marked Pk to file
    np.savetxt('My_marked_Pk.txt', np.transpose([MPk.k3D, MPk.Pk[:,0]]))
    ####################################
+
+Binning power spectra
+---------------------
+
+Sometimes we may want to compare the power spectrum measured in a simulation versus the theoretical one (e.g. the linear power spectrum). On large scales, the number of modes will be small, so the binning used to compute the power spectrum becomes important when comparing simulations versus theory. Pylians provides the routine ``expected_Pk`` that will take a power spectrum and will bin it in the same way as is done with the simulations, so a comparison k by k is appropiate.
+
+The ingredients needed are:
+
+- ``k_in``. This is an array with the values of k. 
+- ``Pk_in``. This is an array with the values of the power spectrum at ``k_in``. 
+- ``BoxSize``. Size of the simulation. If you want to bin the input power spectrum in the same way as the power spectrum measured from a simulation with 1000 Mpc/h, then set ``BoxSize = 1000.0``. This parameter determines the fundamental frequency.
+- ``grid``. The routine will bin the power spectrum according to a mesh with grid x grid x grid voxels. This parameters determines the Nyquist frequency.
+
+An example is this:
+
+.. code-block:: python
+
+   import numpy as np
+   import Pk_library as PKL
+
+   # value of the parameters
+   f_in    = 'my_linear_Pk.txt'  #input power spectrum
+   BoxSize = 1000.0 #Mpc/h       #same of box to compute the binned Pk
+   grid    = 256                 #compute binned Pk using a mesh with grid^3 voxels
+   
+   # read input power spectrum
+   k_in, Pk_in = np.loadtxt(f_in, unpack=True)
+   
+   # get binned Pk: returns k, power spectrum and number of modes in each k-bin
+   k, Pk, Nmodes = PKL.expected_Pk(k_in, Pk_in, BoxSize, grid)
