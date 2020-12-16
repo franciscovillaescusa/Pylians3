@@ -5,10 +5,15 @@ Power spectrum
 Pylians provide several routines to compute power spectra, that we outline now.
 
 
+3D
+------------
+
+Pylians provide routines to compute different power spectra for 3 dimensional fields.
+
 .. _auto-Pk: 
 
 Auto-power spectrum
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 The ingredients needed to compute the auto-power spectra are:
 
@@ -55,7 +60,7 @@ An example on how to compute the power spectrum is this:
 
 
 Cross-power spectrum
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 Pylians also provides routines to compute the auto- and cross-power spectrum of multiple fields. For instance, to compute the auto- and cross-power spectra of two fields, ``delta1`` and ``delta2``:
 
@@ -110,7 +115,7 @@ The ``XPk`` function can be used for more than two fields, e.g.
    
 
 Marked-power spectrum
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 The above routines can be used for standard fields or for marked fields. The script below shows an example of how to compute a marked power spectrum where each particle is weighted by its mean density within a radius of 10 Mpc/h (see :ref:`smoothing` to see how to smooth a field).
 
@@ -183,8 +188,8 @@ The above routines can be used for standard fields or for marked fields. The scr
    np.savetxt('My_marked_Pk.txt', np.transpose([MPk.k3D, MPk.Pk[:,0]]))
    ####################################
 
-Binning power spectra
----------------------
+Binned power spectrum
+~~~~~~~~~~~~~~~~~~~~~
 
 Sometimes we may want to compare the power spectrum measured in a simulation versus the theoretical one (e.g. the linear power spectrum). On large scales, the number of modes will be small, so the binning used to compute the power spectrum becomes important when comparing simulations versus theory. Pylians provides the routine ``expected_Pk`` that will take a power spectrum and will bin it in the same way as is done with the simulations, so a comparison k by k is appropiate.
 
@@ -212,3 +217,84 @@ An example is this:
    
    # get binned Pk: returns k, power spectrum and number of modes in each k-bin
    k, Pk, Nmodes = PKL.expected_Pk(k_in, Pk_in, BoxSize, grid)
+
+
+2D
+----
+
+The routines Pylians provide to compute power spectra for 2 dimensional (images/planes) are these:
+
+Auto-power spectrum
+~~~~~~~~~~~~~~~~~~~
+
+Pylians can also compute auto-power spectra of images/planes through the ``Pk_plane`` routine. The ingredients needed are:
+
+- ``delta``. This should be a 2D numpy float32 array, like ``delta = np.zeros((128,128), dtype=np.float32)``.
+- ``BoxSize``. The size of the plane.
+- ``MAS``. Mass-assignment scheme used to generate the 2D density field, if any. Possible options are ``'NGP'``, ``'CIC'``, ``'TSC'``, ``'PCS'``.  If the density field has not been generated with any of these, set it to ``'None'``. This is used to correct for the MAS when computing the power spectrum.
+- ``threads``. Number of openmp threads to be used in the calculation.
+
+An example of how to utilize this function is this:
+
+.. code-block:: python
+
+   import numpy as np
+   import Pk_library as PKL
+
+   # parameters
+   grid    = 128     #the map will have grid^2 pixels
+   BoxSize = 1000.0  #Mpc/h
+   MAS     = 'None'  #MAS used to create the image; 'NGP', 'CIC', 'TSC', 'PCS' o 'None'
+   threads = 1       #number of openmp threads
+
+   # create an empty image
+   delta = np.zeros((grid,grid), dtype=np.float32)
+
+   # compute the Pk of that image
+   Pk2D = PKL.Pk_plane(delta, BoxSize, MAS, threads) 
+
+   # get the attributes of the routine
+   k      = Pk2D.k      #k in h/Mpc
+   Pk     = Pk2D.Pk     #Pk in (Mpc/h)^2
+   Nmodes = Pk2D.Nmodes #Number of modes in the different k bins
+   
+   
+Cross-power spectrum
+~~~~~~~~~~~~~~~~~~~~
+
+Pylians provide the routine ``XPk_plane`` to compute cross-power spectrum between two images. The ingredients needed are:
+
+delta1, delta2, BoxSize, MAS1=None, MAS2=None, threads=1):
+
+- ``delta1``. A 2D numpy float32 array containing the data of the first image.
+- ``delta2``. A 2D numpy float32 array containing the data of the second image.
+- ``BoxSize``. Size of the plane. Note that the size of both images should be the same.
+- ``MAS1``. The MAS (mass assignment scheme) employed to construct the first image, if any. Possible options are ``'NGP'``, ``'CIC'``, ``'TSC'``, ``'PCS'``.  If the density field has not been generated with any of these, set it to ``'None'``. This is used to correct for the MAS when computing the power spectrum.
+- ``MAS2``. Same as ``MAS1`` but for the second image.
+- ``threads``. Number of openmp threads to use.
+
+An example of how to utilize this routine is this:
+
+.. code-block:: python
+
+   import numpy as np
+   import Pk_library as PKL
+
+   # parameters
+   BoxSize = 1000.0 #Mpc/h
+   MAS1    = 'CIC'
+   MAS2    = 'None'
+   threads = 1
+
+   # compute cross-power spectrum between two images
+   XPk2D = PKL.XPk_plane(delta1, delta2, BoxSize, MAS1, MAS2, threads)
+
+   # get the attributes of the routine
+   k      = XPk2D.k        #k in h/Mpc
+   Pk     = XPk2D.Pk       #auto-Pk of the two maps in (Mpc/h)^2
+   Pk1    = Pk[:,0]        #auto-Pk of the first map in (Mpc/h^2)
+   Pk2    = Pk[:,1]        #auto-Pk of the second map in (Mpc/h^2)
+   XPk    = XPk2D.XPk      #cross-Pk in (Mpc/h)^2
+   r      = XPk2D.r        #cross-correlation coefficient
+   Nmodes = XPk2D.Nmodes   #number of modes in each k-bin
+   
