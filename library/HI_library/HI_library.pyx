@@ -4,7 +4,7 @@ import readsnapHDF5 as rs
 cimport numpy as np
 cimport cython
 from libc.math cimport sqrt,pow,sin,log10,abs,exp,log,rint
-import readsnap, #groupcat
+import readsnap#, groupcat
 import units_library as UL
 import MAS_library as MASL
 import units_library as UL
@@ -188,6 +188,7 @@ cpdef HI_mass_from_Illustris_snap(snapshot, TREECOOL_file):
     return pos, MHI
 
 #########################################################################    
+"""
 # This routine identifies the offsets for halos and galaxies
 # and perform several checks
 @cython.boundscheck(False)
@@ -258,6 +259,7 @@ cpdef test(f_offset, snapshot_root, num):
             raise Exception('Offset of subhalos are different!!!')
 
     return np.asarray(end_halos),np.asarray(end_all_galaxies)
+"""
 #########################################################################    
 
 # This routine computes the HI 
@@ -1351,7 +1353,7 @@ cpdef void HI_mass_SO(np.float32_t[:,::1] halo_pos, np.float32_t[::1] halo_R,
 
 #     return M_HI_tot, cross_section
 
-
+"""
 # This routine computes the cross-section of the DLAs
 # resolution -----> spatial resolution in Mpc/h for the grid
 # NHI_values -----> computes the cross-section for different NHI values
@@ -1516,7 +1518,7 @@ def DLAs_cross_section(snapshot_root, snapnum, TREECOOL_file, resolution,
                 begin = offset+npart
 
     return halo_mass, M_HI_tot, cross_section
-
+"""
 
 # This routine computes the DLAs cross-section of a single halo
 @cython.boundscheck(False)
