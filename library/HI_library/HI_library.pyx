@@ -4,7 +4,7 @@ import readsnapHDF5 as rs
 cimport numpy as np
 cimport cython
 from libc.math cimport sqrt,pow,sin,log10,abs,exp,log,rint
-import readsnap, groupcat
+import readsnap, #groupcat
 import units_library as UL
 import MAS_library as MASL
 import units_library as UL
