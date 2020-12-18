@@ -50,6 +50,7 @@ if min_overdensity==None:  min_overdensity = np.min(overdensity)
 if max_overdensity==None:  max_overdensity = np.max(overdensity)
 
 overdensity[np.where(overdensity<min_overdensity)] = min_overdensity
+overdensity[np.where(overdensity>max_overdensity)] = max_overdensity
 
 if scale=='linear':
     cax = ax1.imshow(overdensity,cmap=get_cmap(cmap),origin='lower',
