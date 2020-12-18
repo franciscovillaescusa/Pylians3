@@ -1,5 +1,5 @@
-Pylians3 documentation
-======================
+Pylians3
+========
 
 Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\umerical **s**\imulations. They are a set of python libraries, written in python, cython and C, whose purposes is to facilitate the analysis of numerical simulations (both N-body and hydrodynamic). Pylians3 evolved from `Pylians <https://github.com/franciscovillaescusa/Pylians>`__ to support python3. Among other things, they can be used to:
 
