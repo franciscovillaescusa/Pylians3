@@ -32,8 +32,7 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    standard_fields
    marked_fields
    field_interpolation
-   hydro_sims_fields2D
-   hydro_sims_fields3D
+   hydro_sims
 	     
 .. toctree::
    :maxdepth: 2

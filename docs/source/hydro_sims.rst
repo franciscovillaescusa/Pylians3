@@ -1,12 +1,15 @@
-*****************************
-Hydrodynamic simulations (2D)
-*****************************
+************************
+Hydrodynamic simulations
+************************
+
+2 dimensions
+------------
 
 Imagine that you have a collection of particles at some positions ``pos`` and each particle represents either a sphere (for SPH simulations) or a voronoi cell (for moving mesh simulations). If you would like to use a more physical mass assignment scheme than NGP, CIC...etc, Pylians provide several routines to deal with these situations and create 2D density fields. We now describe the available routines.
 
 
 Sampling with tracers
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 The routine ``voronoi_NGP_2D`` is designed to take as input particle positions (voronoi cells) in 2D, masses and radii from moving mesh hydrodynamic simulations and compute the density field in a 2D region. This routine works as follows. It considers each particle as a uniform circle and associate the mass on it to the grid itself. It achieves that by splitting the circle into ``r_divisions`` shells that have the same area. Then, it associates to each shell a number of ``particles_per_cell`` that are distributed equally in angle. Finally, each of those subparticles belonging to the initial circle, is associated to a grid cell using the NGP mass assignment scheme. Note that this routine can be very computationally expensive if each particle is subsampled with many subparticles. The ingredients needed are:
 
@@ -39,7 +42,7 @@ The routine ``voronoi_NGP_2D`` is designed to take as input particle positions (
 
 
 Column density: voronoi cells
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This routine is designed to take as input particle positions (voronoi cells) in 3D, masses and radii from moving mesh hydrodynamic simulations and compute the column density field in a 2D region. Note that the difference with respect to the above routine is that in this case we compute the projected mass density, not the density itself (as above). This routine works as follows. It considers each particle/cell as a uniform sphere. It then takes a regular grid with the same dimensions as ``density``, and in each grid cell computes the projected density of all particles contributing to that line-of-sight. Notice that in this case mass conservation is not fullfilled, as in each grid cell a single line-of-sight is considered. The ingredients needed are:
 
@@ -68,10 +71,14 @@ This routine is designed to take as input particle positions (voronoi cells) in 
    # compute the density field
    MASL.voronoi_RT_2D(density, pos, mass, radius, x_min, y_min,
 		      axis_x, axis_y, BoxSize, periodic, verbose=True)
+
+.. Note::
+
+   More detailed scripts can be found `here <https://camels.readthedocs.io/en/latest/images.html>`_. 
 		   
 
 Column density: SPH
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 This routine is basically the same as the above, but instead of assuming uniform spheres, uses the SPH kernel as its internal density profile. The ingredients needed are:
 
@@ -100,3 +107,12 @@ This routine is basically the same as the above, but instead of assuming uniform
    # compute the density field
    MASL.SPH_RT_2D(density, pos, mass, radius, x_min, y_min,
 		  axis_x, axis_y, BoxSize, periodic, verbose=True)
+
+   
+		  
+3 dimensions
+------------
+
+In hydrodynamic simulations, gas is usually modelled as spheres or voronoi cells. In this case, instead of using the standard mass assignment schemes such as NPG, CIC or TSC, it is better to associate these spheres to the regular grid. We recomment using this code to achieve this:
+
+`voxelize <https://github.com/leanderthiele/voxelize>`_
