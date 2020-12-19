@@ -11,6 +11,10 @@ Pylians provides the routine ``MA`` to construct 2D and 3D density fields from t
 - ``W``. The weight associated to each particle, if any. If no weights used, set it ``None``.
 - ``verbose``. Whether to print some information on the progress.
 
+.. Note::
+
+   If you want to construct a field in redshift-space, you will need the particle positions in redshift-space. See :ref:`RSD` on how move particles, halos, galaxies...etc, from real to redshift-space.
+
 We now provide examples on how to use this routine:
 
 Density field in 3D

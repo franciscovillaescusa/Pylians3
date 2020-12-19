@@ -30,6 +30,7 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    :caption: Density fields
 
    construction
+   RSD
    smoothing
    interpolation
    gadget_df
