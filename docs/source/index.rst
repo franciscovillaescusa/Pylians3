@@ -29,9 +29,10 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    :maxdepth: 2
    :caption: Density fields
 
-   standard_fields
-   marked_fields
-   field_interpolation
+   construction
+   smoothing
+   interpolation
+   gadget_df
    hydro_sims
 	     
 .. toctree::
@@ -42,7 +43,6 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    xi
    Bk
    voids
-   smoothing
    RSD
 
 .. toctree::

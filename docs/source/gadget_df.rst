@@ -1,13 +1,14 @@
-###############
-Standard fields
-###############
+**************************
+N-body simulations: Gadget
+**************************
 
-Pylians3 provide routines to compute power spectra, bispectra, identify voids...etc. Most of these routines take as input a density field. Here we outline how Pylians constructs density fields from particle positions.
+Pylians provides the routine ``density_field_gadget`` that simplifies the construction of 3D density fields from Gadget snapshots.
 
-Gadget Snapshots
-----------------
+.. Note::
 
-For Gadget snapshots, Pylians provides the routine ``density_field_gadget`` to compute the density field from the snapshot itself. The ingredients needed are these:
+   This routine should also work smoothly with AREPO & GIZMO snapshots.
+
+The arguments of this routine are:
 
 - ``snapshot``. This is the name of the gadget snapshot. Pylians supports formats 1, 2 and hdf5. Set it as ``'snap_001'``, even if the files are ``'snap_001.0'``, ``'snap_001.1'``, ... or ``'snap_001.0.hdf5'``, ``'snap_001.1.hdf5'``.
   
@@ -30,7 +31,7 @@ This is an example of how to use this routine:
 
    snapshot = 'snapdir_010/snap_010'  #snapshot name
    grid     = 512                     #grid size
-   ptypes   = [1]                     #CDM
+   ptypes   = [1,2]                   #CDM + neutrinos
    MAS      = 'CIC'                   #Cloud-in-Cell
    do_RSD   = False                   #dont do redshif-space distortions
    axis     = 0                       #axis along which place RSD; not used here
@@ -40,34 +41,3 @@ This is an example of how to use this routine:
 
    # compute density contrast: delta = rho/<rho> - 1
    delta /= np.mean(delta, dtype=np.float64);  delta -= 1.0
-
-
-Particle positions
-------------------
-
-Pylians can also create density fields from particle positions. An example is this
-
-.. code-block:: python
-		
-   import numpy as np
-   import MAS_library as MASL
-
-   # input parameters
-   grid    = 512    #grid size
-   BoxSize = 1000   #Mpc/h
-   MAS     = 'CIC'  #Cloud-in-Cell
-
-   # define the array hosting the density field
-   delta = np.zeros((grid,grid,grid), dtype=np.float32)
-
-   # read the particle positions
-   pos = np.loadtxt('myfile.txt') #Mpc/h 
-   pos = pos.astype(np.float32)   #pos should be a numpy float array
-
-   # compute number of particles in each voxel
-   MASL.MA(pos,delta,BoxSize,MAS)
-
-   # compute density contrast: delta = rho/<rho> - 1
-   delta /= np.mean(delta, dtype=np.float64);  delta -= 1.0 
-
-
