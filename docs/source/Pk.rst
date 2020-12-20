@@ -188,6 +188,38 @@ The above routines can be used for standard fields or for marked fields. The scr
    np.savetxt('My_marked_Pk.txt', np.transpose([MPk.k3D, MPk.Pk[:,0]]))
    ####################################
 
+Velocity power spectrum
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Pylians provides a routine, ``Pk_theta`` that computes the power spectrum of the divergence of a 3D velocity field: :math:`P_{\theta \theta}`, where :math:`\theta=\vec{\nabla}\cdot\vec{V}`. The arguments of the routine are these:
+
+- ``Vx``. A 3D numpy float32 array containing the x component of the 3D velocity field, e.g. ``Vx = np.zeros((128,128,128), dtype=np.float32)``.
+- ``Vy``. A 3D numpy float32 array containing the y component of the 3D velocity field.
+- ``Vz``. A 3D numpy float32 array containing the z component of the 3D velocity field.
+- ``BoxSize``. The size of the simulation box. Units here will determine units of output.
+  - ``axis``. Axis along which compute the quadrupole, hexadecapole for the theta Pk. If the velocities are in real-space set ``axis=0``. If the velocities are in redshift-space set ``axis=0``, ``axis=1`` or ``axis=2`` if the redshift-space distortions have been placed along the x-axis, y-axis or z-axis, respectively. 
+- ``MAS``. Mass-assignment scheme used to generate the velocity field, if any. Possible options are ``'NGP'``, ``'CIC'``, ``'TSC'``, ``'PCS'``.  If the velocity field has not been generated with any of these set it to ``'None'``. This is used to correct for the MAS when computing the power spectrum.
+- ``threads``. Number of openmp threads to be used.
+
+An example of how to use this routine is this:
+
+.. code-block:: python
+
+   import numpy as np
+   import Pk_library as PKL
+
+   # parameters
+   BoxSize = 1000.0 #Mpc/h
+   axis    = 0      #velocity fields in real-space; this variable is not relevant in real-space
+   MAS     = 'CIC'  #mass-assignment scheme used to create the velocity field
+   threads = 20     #number of openmp threads to be used
+
+   # compute the theta auto-power spectrum
+   k, Pk, Nmodes = PKL.Pk_theta(Vx,Vy,Vz,BoxSize,axis,MAS,threads)
+
+   # k will be in h/Mpc units. Pk will have (km/s)^2*(Mpc/h)^3 considering that the velocity field is in km/s
+   
+
 Binned power spectrum
 ~~~~~~~~~~~~~~~~~~~~~
 

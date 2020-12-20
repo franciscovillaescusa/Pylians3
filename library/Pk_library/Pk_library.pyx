@@ -1329,7 +1329,7 @@ def Pk_theta(Vx,Vy,Vz,BoxSize,axis=2,MAS='CIC',threads=1):
     Pk = Pk[1:]*(BoxSize/dims**2)**3*kF**2;  Pk *= (1.0/Nmodes);
     print('Time taken = %.2f seconds'%(time.time()-start))
 
-    return [k,Pk,Nmodes]
+    return k,Pk,Nmodes
 ################################################################################
 ################################################################################
 
