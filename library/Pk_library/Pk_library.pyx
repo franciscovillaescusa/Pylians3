@@ -1446,7 +1446,7 @@ def XPk_dv(delta,Vx,Vy,Vz,BoxSize,axis=2,MAS='CIC',threads=1):
     PkX = PkX[1:]*(BoxSize/dims**2)**3*kF;     PkX *= (1.0/Nmodes)
     print('Time taken = %.2f seconds'%(time.time()-start))
 
-    return [k,Pk1,Pk2,PkX,Nmodes]
+    return k,Pk1,Pk2,PkX,Nmodes
 ################################################################################
 ################################################################################
 
