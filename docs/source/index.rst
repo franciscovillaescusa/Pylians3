@@ -58,6 +58,7 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    gaussian_fields
    integrals
    gadget
+   Pk_ics
 
 .. toctree::
    :maxdepth: 2
