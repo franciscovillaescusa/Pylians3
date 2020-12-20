@@ -57,7 +57,7 @@ An example on how to compute the power spectrum is this:
 .. note::
 
    The 1D power spectrum is computed as :math:`P_{\rm 1D}(k_\parallel)=\int \frac{d^2\vec{k}_\bot}{(2\pi)^2}P_{\rm 3D}(k_\parallel,k_\bot)`. This shouldn't be confused with the traditional 3D power spectrum.
-
+   
 
 Cross-power spectrum
 ~~~~~~~~~~~~~~~~~~~~
@@ -112,6 +112,41 @@ The ``XPk`` function can be used for more than two fields, e.g.
    threads = 16
 
    Pk = PKL.XPk([delta1,delta2,delta3,delta4], BoxSize, axis, MAS, threads)
+
+   
+Gadget snapshots
+~~~~~~~~~~~~~~~~
+
+Pylians provides the routine ``Pk_Gadget`` that simplifies the computation of auto-power spectra from Gadget snapshots. The arguments of that routine are these:
+
+- ``snapshot``. The name of the Gadget snapshot (supports format I, II and hdf5 files). If you have multiple files per snapshot, just use the prefix. For instance, if you have files as ``snapdir_004/snap_004.0.hdf5``, ``snapdir_004/snap_004.1.hdf5``, ``snapdir_004/snap_004.2.hdf5``...etc, use ``snapdir_004/snap_004``. For single files, you can use either the prefix or the full name.
+- ``grid``. The routine will compute the density field on a regular grid with grid x grid x grid voxels. This will basically determine the size of the Nyquist frequency in the power spectrum calculation.
+- ``particle_type``. The particle types to be used; this routine supports several types. For instance [1] for dark matter, [2] for neutrinos, [4] for stars. It can also be several of them, e.g. [1,2] for dark matter + neutrinos.
+- ``do_RSD``. Whether move particles to redshift-space and compute power spectrum in redshift-space.
+- ``axis``. Axis along which place the redshift-space distortions. Only matters if ``do_RSD = True``.
+- ``cpus``. Number of openmp threads to be used in the calculation.
+- ``folder_out``. Folder where to write the results. If set to ``None``, results will be written in the current folder.
+
+An example of how to use this routine is this:
+
+.. code-block:: python
+
+   import numpy as np
+   import Pk_library as PKL
+
+   # parameters
+   snapshot      = '/home/Paco/Quijote/Snapshots/fiducial/34/snapdir_004/snap_004' #snapshot name
+   grid          = 512    #grid size
+   particle_type = [1]    #use dark matter [1]
+   do_RSD        = True   #move particles to redshift-space and calculate Pk in redshift-space
+   axis          = 1      #RSD placed along the y-axis
+   cpus          = 8      #number of openmp threads
+   folder_out    = '/home/Paco/Quijote/Pk/fiducial/34' #folder where to write results
+
+   # compute power spectrum of the snapshot
+   PKL.Pk_Gadget(snapshot, grid, particle_type, do_RSD, axis, cpus, folder_out)
+
+Calling the routine will compute the auto-power spectrum of the different particle types and their cross-power spectra (for multiple particle types). It will write files for the different auto- and cross-power spectra. The format of the files will be ``k Pk0 Pk2 Pk4 Nmodes``, where ``k`` is the wavenumber in units of h/Mpc (if snapshot is in kpc/h units), ``Pk0``, ``Pk2``, and ``Pk4`` are the monopole, quadrupole, and hexadecapole in units of (Mpc/h)^3 and ``Nmodes`` is the number of modes inside each k-bin.
    
 
 Marked-power spectrum
@@ -255,7 +290,7 @@ An example on how to use this routine is this:
    # Pk_dd will contain the standard power spectrum in (Mpc/h)^3
    # Pk_tt will be the momentum auto-power spectrum, defined as above, and with units of (km/s)^2*(Mpc/h)^3 in units of velocity field are (km/s)
    # Pk_dt will be the density-momentum cross-power spectrum with (km/s)*(Mpc/h)^3 units if velocity field has (km/s) units
-   k, Pk_dd, Pk_tt, Pk_dt, Nmodes = PKL.XPk_dv(delta,Vx,Vy,Vz,BoxSize,axis,MAS,threads)
+   k, Pk_dd, Pk_tt, Pk_dt, Nmodes = PKL.XPk_dv(delta, Vx, Vy, Vz, BoxSize, axis, MAS, threads)
    
 
 Binned power spectrum
