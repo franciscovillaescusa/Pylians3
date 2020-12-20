@@ -218,6 +218,10 @@ An example of how to use this routine is this:
    k, Pk, Nmodes = PKL.Pk_theta(Vx,Vy,Vz,BoxSize,axis,MAS,threads)
 
    # k will be in h/Mpc units. Pk will have (km/s)^2*(Mpc/h)^3 considering that the velocity field is in km/s
+
+.. warning::
+
+   One of the well known problems of computing the velocity power spectrum is empty voxels. When constructing the velocity field, it may happen that no particles reside within (or around) a given voxel. In this case, the velocity field is not well defined. In general, a zero velocity is assigned to that voxel, but that could be a very wrong assumption: for instance, inside voids the the number of particle/galaxy tracers may be low, but the underlying velocity field may be very different to 0. Thus, when using this routine, it is important to make convergence tests (e.g. using different grid sizes for the velocity field) to study the extent and/or presence of this problem.
    
 
 Binned power spectrum
