@@ -222,6 +222,40 @@ An example of how to use this routine is this:
 .. warning::
 
    One of the well known problems of computing the velocity power spectrum is empty voxels. When constructing the velocity field, it may happen that no particles reside within (or around) a given voxel. In this case, the velocity field is not well defined. In general, a zero velocity is assigned to that voxel, but that could be a very wrong assumption: for instance, inside voids the the number of particle/galaxy tracers may be low, but the underlying velocity field may be very different to 0. Thus, when using this routine, it is important to make convergence tests (e.g. using different grid sizes for the velocity field) to study the extent and/or presence of this problem.
+
+Momentum power spectrum
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Differently to the velocity field, the momentum field, :math:`\vec{p}=\rho \vec{V}`, is well-defined everywhere (even in voxels where there are no particles). Pylians provides the routine ``XPk_dv`` that computes :math:`P_{\delta\delta}`, :math:`P_{\tilde{\theta}\tilde{\theta}}`, and :math:`P_{\delta\tilde{\theta}}`, where :math:`\delta=\rho/\bar{\rho}-1` and :math:`\tilde{\theta}=\vec{\nabla}\cdot(1+\delta)\vec{V}`. The arguments of the function are these:
+
+- ``delta``. A 3D numpy float32 array containing the value of the density constrast in each voxel.
+- ``Vx``. A 3D numpy float32 array containing the x component of the 3D velocity field, e.g. ``Vx = np.zeros((128,128,128), dtype=np.float32)``.
+- ``Vy``. A 3D numpy float32 array containing the y component of the 3D velocity field.
+- ``Vz``. A 3D numpy float32 array containing the z component of the 3D velocity field.
+- ``BoxSize``. The size of the simulation box. Units here will determine units of output.
+  - ``axis``. Axis along which compute the quadrupole, hexadecapole for the theta Pk. If the velocities are in real-space set ``axis=0``. If the velocities are in redshift-space set ``axis=0``, ``axis=1`` or ``axis=2`` if the redshift-space distortions have been placed along the x-axis, y-axis or z-axis, respectively. 
+- ``MAS``. Mass-assignment scheme used to generate the velocity field, if any. Possible options are ``'NGP'``, ``'CIC'``, ``'TSC'``, ``'PCS'``.  If the velocity field has not been generated with any of these set it to ``'None'``. This is used to correct for the MAS when computing the power spectrum.
+- ``threads``. Number of openmp threads to be used.
+
+An example on how to use this routine is this:
+
+.. code-block:: python
+
+   import numpy as np
+   import Pk_library as PKL
+
+   # parameters
+   BoxSize  = 1000.0  #Mpc/h
+   axis     = 0       #no RSD
+   MAS      = 'CIC'   #it assumes the density constrast and velocities have been generated with the same MAS
+   threads  = 2       #number of openmp threads
+
+   # compute the density constrast and momentum auto- and cross-power spectra
+   # k will have units of h/Mpc
+   # Pk_dd will contain the standard power spectrum in (Mpc/h)^3
+   # Pk_tt will be the momentum auto-power spectrum, defined as above, and with units of (km/s)^2*(Mpc/h)^3 in units of velocity field are (km/s)
+   # Pk_dt will be the density-momentum cross-power spectrum with (km/s)*(Mpc/h)^3 units if velocity field has (km/s) units
+   k, Pk_dd, Pk_tt, Pk_dt, Nmodes = PKL.XPk_dv(delta,Vx,Vy,Vz,BoxSize,axis,MAS,threads)
    
 
 Binned power spectrum
