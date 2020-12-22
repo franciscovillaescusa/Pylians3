@@ -55,6 +55,7 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
 
    plots
    cosmology
+   mass_function
    gaussian_fields
    integrals
    gadget
