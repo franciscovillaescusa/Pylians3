@@ -42,3 +42,30 @@ An example of how to use this routine is this:
    HMF = MFL.MF_theory(k, Pk, OmegaM, Masses, author, bins, z, delta)
 
    
+variance
+~~~~~~~~
+
+Pylians provides the routine ``sigma`` that can be used to compute :math:`\sigma_R`, defined as
+
+.. math::
+
+   \sigma_R = \int_0^\infty P(k)W(k,R)^2k^2/(2\pi^2)
+
+where :math:`W(k,R)` is the Fourier transform of a top-hat function with radius :math:`R`:
+
+.. math::
+
+   W(k,R) = \frac{3[\sin(kR) - kR\cos(kR)]}{(kR)^3}
+
+The most standard applicaiton of this routine is to compute the value of :math:`\sigma_8` given a linear power spectrum:  
+
+.. code-block:: python
+
+   import numpy as np
+   import mass_function_library as MFL
+
+   # read linear power spectrum
+   k, Pk = np.loadtxt('My_linear_Pk.txt', unpack=True)
+
+   # compute the value of sigma_8
+   sigma_8 = MFL.sigma(k, Pk, 8.0)
