@@ -69,7 +69,7 @@ One example on how to use Pylians to plots the density field of a snapshot is th
                           vmin=min_overdensity,vmax=max_overdensity)
    else:
          cax = ax1.imshow(overdensity,cmap=get_cmap(cmap),origin='lower',
-	                  extent=[x, x+dx, y, y+dy], interpolation='bibcubic',
+	                  extent=[x, x+dx, y, y+dy], interpolation='bicubic',
                           norm = LogNorm(vmin=min_overdensity,vmax=max_overdensity))
 
    cbar = fig.colorbar(cax)
