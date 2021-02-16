@@ -601,119 +601,285 @@ cpdef void CIC_interp(np.ndarray[np.float32_t,ndim=3] density, float BoxSize,
 
 
 # This routine computes the 2D density field from a set of voronoi cells that
-# have masses and volumes.
+# have masses and volumes. It considers each particle as a sphere and split it 
+# into particles_per_cell tracers. 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-cpdef void voronoi_NGP_2D(np.ndarray[np.float64_t,ndim=2] density, 
-                          np.ndarray[np.float32_t,ndim=2] pos,
-                          np.ndarray[np.float32_t,ndim=1] mass,
-                          np.ndarray[np.float32_t,ndim=1] radii,
+cpdef void voronoi_NGP_2D(np.float64_t[:,:] field, np.float32_t[:,:] pos,
+                          np.float32_t[:] mass, np.float32_t[:] radii,
                           float x_min, float y_min, float BoxSize,
-                          long particles_per_cell, int r_divisions,
-                          periodic):
+                          long tracers, int r_divisions, periodic):
 
     cdef float pi = np.pi
-    cdef long i, j, k, particles, particles_shell, dims
-    cdef double R1, R2, A_shell, dtheta, angle
-    cdef np.float32_t[:] R
+    cdef long i, j, k, particles, grid, count
+    cdef double dtheta, angle, R, R1, R2, area, length, V_sphere, norm
+    cdef double R_cell, W_cell, x_cell, y_cell
     cdef np.float32_t[:,:] pos_tracer
-    cdef float radius, x, y, inv_cell_size, W, radius_voronoi_cell
-    cdef int index_x, index_y
+    cdef np.float32_t[:] w_tracer
+    cdef double radius, x, y, w, inv_cell_size
+    cdef int index_x, index_y, index_xp, index_xm, index_yp, index_ym
+    cdef int theta_divisions
 
     # verbose
-    print('Finding density field of the voronoi tracers...')
+    print('Calculating projected mass of the voronoi tracers...')
     start = time.time()
 
     # find the number of particles to analyze and inv_cell_size
     particles     = pos.shape[0]
-    dims          = density.shape[0]
-    inv_cell_size = dims*1.0/BoxSize
+    grid          = field.shape[0]
+    inv_cell_size = grid*1.0/BoxSize
 
     # compute the number of particles in each shell and the angle between them
-    particles_shell = particles_per_cell//r_divisions
-    dtheta          = 2.0*pi/particles_shell
+    theta_divisions = tracers//r_divisions
+    dtheta          = 2.0*pi/theta_divisions
+    V_sphere        = 4.0*pi*1.0**3/3.0
 
-    # define the array containing the normalized radii
-    R = np.zeros(r_divisions, dtype=np.float32)
-
-    # do a loop over the different shells and compute the mean radii to them
-    A_shell, R1 = 4.0*pi/r_divisions, 0.0
-    for j in range(r_divisions):
-        R2 = sqrt(A_shell/(4.0*pi) + R1**2)
-        R[j] = 0.5*(R1+R2)
-        R1 = R2
+    # define the arrays with the properties of the tracers; positions and weights
+    pos_tracer = np.zeros((tracers,2), dtype=np.float32)
+    w_tracer   = np.zeros(tracers,     dtype=np.float32)
 
     # define and fill the array containing pos_tracer
-    pos_tracer = np.zeros((particles_shell,2), dtype=np.float32)
-    angle = 0.0
-    for i in range(particles_shell):
-        pos_tracer[i,0] = cos(angle)
-        pos_tracer[i,1] = sin(angle)
-        angle += dtheta
-        
+    count = 0
+    for i in range(r_divisions):
+        R1, R2 = i*1.0/r_divisions, (i+1.0)/r_divisions
+        R = 0.5*(R1 + R2)
+        area = pi*(R2**2 - R1**2)/theta_divisions
+        length = 2.0*sqrt(1.0**2 - R**2)
+        for j in range(theta_divisions):
+            angle = 2.0*pi*(j + 0.5)/theta_divisions
+            pos_tracer[count,0] = R*cos(angle)
+            pos_tracer[count,1] = R*sin(angle)
+            w_tracer[count]     = area*length/V_sphere
+            count += 1
+
+    # normalize weights of tracers to force them to sum 1
+    norm = np.sum(w_tracer, dtype=np.float64)
+    for i in range(tracers):
+        w_tracer[i] = w_tracer[i]/norm
         
     if periodic:
         
         # do a loop over all particles
         for i in range(particles):
-        
-            # compute the weight of each voronoi-cell tracer
-            W = mass[i]*1.0/(particles_shell*r_divisions)
-        
-            # compute the "radius" of the voronoi cell
-            radius_voronoi_cell = radii[i]
 
-            # do a loop over the different shells of the sphere
-            for j in range(r_divisions):
+            R_cell = radii[i]
+            W_cell = mass[i]
+            x_cell = pos[i,0]
+            y_cell = pos[i,1]
 
-                radius = R[j]*radius_voronoi_cell
-            
-                # do a loop over all particles in the shell
-                for k in range(particles_shell):
+            # see if we need to split the particle into tracers or not
+            index_xm = <int>((x_cell-R_cell-x_min)*inv_cell_size + 0.5)
+            index_xp = <int>((x_cell+R_cell-x_min)*inv_cell_size + 0.5)
+            index_ym = <int>((y_cell-R_cell-y_min)*inv_cell_size + 0.5)
+            index_yp = <int>((y_cell+R_cell-y_min)*inv_cell_size + 0.5)
+
+            if (index_xm==index_xp) and (index_ym==index_yp):
+                index_x = (index_xm + grid)%grid
+                index_y = (index_ym + grid)%grid
+                field[index_x, index_y] += W_cell
                 
-                    x = pos[i,0] + radius*pos_tracer[k,0]
-                    y = pos[i,1] + radius*pos_tracer[k,1]
-            
+            else:
+
+                # do a loop over all tracers
+                for j in range(tracers):
+
+                    x = x_cell + R_cell*pos_tracer[j,0]
+                    y = y_cell + R_cell*pos_tracer[j,1]
+                    w = W_cell*w_tracer[j]
+
                     index_x = <int>((x-x_min)*inv_cell_size + 0.5)
                     index_y = <int>((y-y_min)*inv_cell_size + 0.5)
-                    index_x = (index_x + dims)%dims
-                    index_y = (index_y + dims)%dims
-                
-                    density[index_x, index_y] += W
+                    index_x = (index_x + grid)%grid
+                    index_y = (index_y + grid)%grid
+                    
+                    field[index_x, index_y] += w
 
     else:
 
         # do a loop over all particles
         for i in range(particles):
         
-            # compute the weight of each voronoi-cell tracer
-            W = mass[i]*1.0/(particles_shell*r_divisions)
-        
-            # compute the "radius" of the voronoi cell
-            radius_voronoi_cell = radii[i]
+            R_cell = radii[i]
+            W_cell = mass[i]
+            x_cell = pos[i,0]
+            y_cell = pos[i,1]
 
-            # do a loop over the different shells of the sphere
-            for j in range(r_divisions):
+            # do a loop over all tracers
+            for j in range(tracers):
 
-                radius = R[j]*radius_voronoi_cell
-            
-                # do a loop over all particles in the shell
-                for k in range(particles_shell):
+                x = x_cell + R_cell*pos_tracer[j,0]
+                y = y_cell + R_cell*pos_tracer[j,1]
+                w = W_cell*w_tracer[j]
+
+                index_x = <int>((x-x_min)*inv_cell_size + 0.5)
+                index_y = <int>((y-y_min)*inv_cell_size + 0.5)
+
+                if (index_x<0) or (index_x>=grid):  continue
+                if (index_y<0) or (index_y>=grid):  continue
                 
-                    x = pos[i,0] + radius*pos_tracer[k,0]
-                    y = pos[i,1] + radius*pos_tracer[k,1]
-            
-                    index_x = <int>((x-x_min)*inv_cell_size + 0.5)
-                    index_y = <int>((y-y_min)*inv_cell_size + 0.5)
-
-                    if (index_x<0) or (index_x>=dims):  continue
-                    if (index_y<0) or (index_y>=dims):  continue
-                
-                    density[index_x, index_y] += W
-
+                field[index_x, index_y] += w
 
     print('Time taken = %.3f s'%(time.time()-start))
+
+
+# This routine computes the 2D density field from a set of voronoi cells that
+# have masses and volumes. It considers each particle as a sphere and split it 
+# into particles_per_cell tracers. 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cpdef void projected_voronoi(np.float64_t[:,:] field, np.float32_t[:,:] pos,
+                             np.float32_t[:] mass, np.float32_t[:] radii,
+                             float x_min, float y_min, float BoxSize,
+                             long tracers, int r_divisions, periodic, verbose=True):
+
+    cdef double pi = np.pi
+    cdef long i, j, k, particles, grid, count
+    cdef double angle, R, R1, R2, area, length, V_sphere, norm
+    cdef double R_cell, W_cell, x_cell, y_cell
+    cdef double x, y, w, inv_cell_size
+    cdef np.float64_t[:,:] pos_tracer
+    cdef np.float64_t[:] w_tracer
+    cdef int index_x, index_y, index_xp, index_xm, index_yp, index_ym
+    cdef int theta_divisions
+
+    # verbose
+    if verbose:  print('Calculating projected mass of the voronoi tracers...')
+    start = time.time()
+
+    # find the number of particles to analyze and inv_cell_size
+    particles     = pos.shape[0]
+    grid          = field.shape[0]
+    inv_cell_size = grid*1.0/BoxSize
+
+    # compute the number of particles in each shell and the angle between them
+    theta_divisions = tracers//r_divisions
+    V_sphere        = 4.0*pi*1.0**3/3.0
+
+    # define the arrays with the properties of the tracers; positions and weights
+    pos_tracer = np.zeros((tracers,2), dtype=np.float64)
+    w_tracer   = np.zeros(tracers,     dtype=np.float64)
+
+    # define and fill the array containing pos_tracer
+    count = 0
+    for i in range(r_divisions)[::-1]:
+        R1, R2 = i*1.0/r_divisions, (i+1.0)/r_divisions
+        R = 0.5*(R1 + R2)
+        area = pi*(R2**2 - R1**2)/theta_divisions
+        length = 2.0*sqrt(1.0**2 - R**2)
+        for j in range(theta_divisions):
+            angle = 2.0*pi*(j + 0.5)/theta_divisions
+            pos_tracer[count,0] = R*cos(angle)
+            pos_tracer[count,1] = R*sin(angle)
+            w_tracer[count]     = area*length/V_sphere
+            count += 1
+
+    # normalize weights of tracers to force them to sum 1
+    norm = np.sum(w_tracer, dtype=np.float64)
+    for i in range(tracers):
+        w_tracer[i] = w_tracer[i]/norm
+        
+    # when using periodic boundary conditions
+    if periodic:
+        
+        # do a loop over all particles
+        for i in range(particles):
+
+            R_cell = radii[i]
+            W_cell = mass[i]
+            x_cell = pos[i,0]
+            y_cell = pos[i,1]
+
+            # do a loop over the different radii
+            count = 0
+            for j in range(r_divisions)[::-1]:
+                R1, R2 = j*1.0/r_divisions, (j+1.0)/r_divisions
+                R = 0.5*(R1 + R2)*R_cell
+
+                # see if we need to split the particle into tracers or not
+                index_xm = <int>((x_cell-R-x_min)*inv_cell_size + 0.5)
+                index_xp = <int>((x_cell+R-x_min)*inv_cell_size + 0.5)
+                index_ym = <int>((y_cell-R-y_min)*inv_cell_size + 0.5)
+                index_yp = <int>((y_cell+R-y_min)*inv_cell_size + 0.5)
+
+                # if particles in the shell are all within the same pixel
+                if (index_xm==index_xp) and (index_ym==index_yp):
+                    index_x = (index_xm + grid)%grid
+                    index_y = (index_ym + grid)%grid
+                    for k in range(count, tracers):
+                        field[index_x, index_y] += W_cell*w_tracer[count]
+                        count += 1
+                    break
+                    
+                else:
+
+                    # do a loop over the particles in the shell
+                    for k in range(theta_divisions):
+
+                        x = x_cell + R_cell*pos_tracer[count,0]
+                        y = y_cell + R_cell*pos_tracer[count,1]
+                        w = W_cell*w_tracer[count]
+
+                        index_x = <int>((x-x_min)*inv_cell_size + 0.5)
+                        index_y = <int>((y-y_min)*inv_cell_size + 0.5)
+                        index_x = (index_x + grid)%grid
+                        index_y = (index_y + grid)%grid
+                        
+                        field[index_x, index_y] += w
+                        count += 1
+
+    # if periodic boundary conditions do not apply
+    else:
+
+        # do a loop over all particles
+        for i in range(particles):
+        
+            R_cell = radii[i]
+            W_cell = mass[i]
+            x_cell = pos[i,0]
+            y_cell = pos[i,1]
+
+            # do a loop over the different radii
+            count = 0
+            for j in range(r_divisions)[::-1]:
+                R1, R2 = j*1.0/r_divisions, (j+1.0)/r_divisions
+                R = 0.5*(R1 + R2)*R_cell
+
+                # see if we need to split the particle into tracers or not
+                index_xm = <int>((x_cell-R-x_min)*inv_cell_size + 0.5)
+                index_xp = <int>((x_cell+R-x_min)*inv_cell_size + 0.5)
+                index_ym = <int>((y_cell-R-y_min)*inv_cell_size + 0.5)
+                index_yp = <int>((y_cell+R-y_min)*inv_cell_size + 0.5)
+
+                # if particles in the shell are all within the same pixel
+                if (index_xm==index_xp) and (index_ym==index_yp):
+                    index_x = (index_xm + grid)%grid
+                    index_y = (index_ym + grid)%grid
+                    for k in range(count, tracers):
+                        field[index_x, index_y] += W_cell*w_tracer[count]
+                        count += 1
+                    break
+                    
+                else:
+
+                    # do a loop over the particles in the shell
+                    for k in range(theta_divisions):
+
+                        x = x_cell + R_cell*pos_tracer[count,0]
+                        y = y_cell + R_cell*pos_tracer[count,1]
+                        w = W_cell*w_tracer[count]
+                        count += 1
+
+                        index_x = <int>((x-x_min)*inv_cell_size + 0.5)
+                        index_y = <int>((y-y_min)*inv_cell_size + 0.5)
+
+                        if (index_x<0) or (index_x>=grid):  continue
+                        if (index_y<0) or (index_y>=grid):  continue
+                        
+                        field[index_x, index_y] += w
+    
+    if verbose:  print('Time taken = %.3f s'%(time.time()-start))
 
 
 
