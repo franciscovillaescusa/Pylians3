@@ -2002,6 +2002,150 @@ class Xi:
 ################################################################################
 ################################################################################
 
+################################################################################
+################################################################################
+# This routine computes the cross-correlation function of two density fields
+# delta1 ------> 3D density field: (grid,grid,grid) numpy array
+# delta2 ------> 3D density field: (grid,grid,grid) numpy array
+# BoxSize -----> size of the cubic density field
+# MAS1 --------> mass assignment scheme used to compute the density field 1
+# MAS2 --------> mass assignment scheme used to compute the density field 2
+# threads -----> number of threads (OMP) used to make the FFTW
+@cython.boundscheck(False)
+@cython.cdivision(True)
+@cython.wraparound(False)
+class XXi:
+    def __init__(self, delta1, delta2, float BoxSize, MAS=['CIC','CIC'],
+                 int axis=2, threads=1):
+
+        start = time.time()
+        cdef int kxx, kyy, kzz, kx, ky, kz, grid, middle, k_index
+        cdef int MAS_index1, MAS_index2
+        cdef int kmax, i, k_par, k_per
+        cdef double k, prefact, mu, mu2
+        cdef double[:,:] MAS_corr
+        ####### change this for double precision ######
+        cdef float real1, real2, imag1, imag2
+        cdef float MAS_factor
+        cdef np.complex64_t[:,:,::1] delta1_k, delta2_k
+        cdef float[:,:,::1] delta_xi
+        ###############################################
+        cdef double[::1] r3D, Nmodes3D
+        cdef double[:,::1] xi3D
+
+        MAS_corr = np.zeros((2,3), dtype=np.float64)
+
+        # find dimensions of delta: we assume is a (grid,grid,grid) array
+        # determine the different frequencies and the MAS_index
+        print('\nComputing correlation function of the field...')
+        grid = delta1.shape[0];  middle = grid//2
+        if grid!=delta2.shape[0]:  raise Exception('grid sizes differ!!!')
+        kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,grid)
+        MAS_index1 = MAS_function(MAS[0])
+        MAS_index2 = MAS_function(MAS[1])
+
+        ## compute FFT of the fields (change this for double precision) ##
+        delta1_k = FFT3Dr_f(delta1,threads)
+        delta2_k = FFT3Dr_f(delta2,threads)
+        #################################
+
+        # for each mode correct for MAS and compute |delta(k)^2|
+        prefact = np.pi/grid
+        for kxx in range(grid):
+            kx = (kxx-grid if (kxx>middle) else kxx)
+            MAS_corr[0,0] = MAS_correction(prefact*kx,MAS_index1)
+            MAS_corr[1,0] = MAS_correction(prefact*kx,MAS_index2)
+
+            for kyy in range(grid):
+                ky = (kyy-grid if (kyy>middle) else kyy)
+                MAS_corr[0,1] = MAS_correction(prefact*ky,MAS_index1)
+                MAS_corr[1,1] = MAS_correction(prefact*ky,MAS_index2)
+
+                for kzz in range(middle+1):
+                    kz = (kzz-grid if (kzz>middle) else kzz)
+                    MAS_corr[0,2] = MAS_correction(prefact*kz,MAS_index1)  
+                    MAS_corr[1,2] = MAS_correction(prefact*kz,MAS_index2)  
+
+                    # correct modes amplitude for MAS
+                    MAS_factor = MAS_corr[0,0]*MAS_corr[0,1]*MAS_corr[0,2]
+                    delta1_k[kxx,kyy,kzz] = delta1_k[kxx,kyy,kzz]*MAS_factor
+                    MAS_factor = MAS_corr[1,0]*MAS_corr[1,1]*MAS_corr[1,2]
+                    delta2_k[kxx,kyy,kzz] = delta2_k[kxx,kyy,kzz]*MAS_factor
+                    
+                    # compute |delta(k)^2|
+                    real1 = delta1_k[kxx,kyy,kzz].real
+                    imag1 = delta1_k[kxx,kyy,kzz].imag
+                    real2 = delta2_k[kxx,kyy,kzz].real
+                    imag2 = delta2_k[kxx,kyy,kzz].imag
+                    delta1_k[kxx,kyy,kzz].real = real1*real2 + imag1*imag2
+                    delta1_k[kxx,kyy,kzz].imag = 0.0
+
+        ## compute IFFT of the field (change this for double precision) ##
+        delta_xi = IFFT3Dr_f(delta1_k,threads);  del delta1_k, delta2_k
+        #################################
+
+
+        # define arrays containing r3D, xi3D and Nmodes3D. We need kmax+1
+        # bins since the mode (middle,middle, middle) has an index = kmax
+        r3D      = np.zeros(kmax+1,     dtype=np.float64)
+        xi3D     = np.zeros((kmax+1,3), dtype=np.float64)
+        Nmodes3D = np.zeros(kmax+1,     dtype=np.float64)
+
+        # do a loop over the independent modes.
+        # compute k,k_par,k_per, mu for each mode. k's are in kF units
+        start2 = time.time()
+        for kxx in range(grid):
+            kx = (kxx-grid if (kxx>middle) else kxx)
+        
+            for kyy in range(grid):
+                ky = (kyy-grid if (kyy>middle) else kyy)
+
+                for kzz in range(grid): #kzz=[0,1,..,middle] --> kz>0
+                    kz = (kzz-grid if (kzz>middle) else kzz)
+
+                    # compute |k| of the mode and its integer part
+                    k       = sqrt(kx*kx + ky*ky + kz*kz)
+                    k_index = <int>k
+
+                    # compute the value of k_par and k_perp
+                    if axis==0:   
+                        k_par, k_per = kx, <int>sqrt(ky*ky + kz*kz)
+                    elif axis==1: 
+                        k_par, k_per = ky, <int>sqrt(kx*kx + kz*kz)
+                    else:         
+                        k_par, k_per = kz, <int>sqrt(kx*kx + ky*ky)
+
+                    # find the value of mu
+                    if k==0:  mu = 0.0
+                    else:     mu = k_par/k
+                    mu2 = mu*mu
+
+                    # take the absolute value of k_par
+                    if k_par<0: k_par = -k_par
+
+                    # Xi3D
+                    r3D[k_index]      += k
+                    xi3D[k_index,0]   +=  delta_xi[kxx,kyy,kzz]
+                    xi3D[k_index,1]   += (delta_xi[kxx,kyy,kzz]*(3.0*mu2-1.0)/2.0)
+                    xi3D[k_index,2]   += (delta_xi[kxx,kyy,kzz]*(35.0*mu2*mu2 - 30.0*mu2 + 3.0)/8.0)
+                    Nmodes3D[k_index] += 1.0
+
+
+        print('Time to complete loop = %.2f'%(time.time()-start2))
+
+        # Xi3D. Discard DC mode bin and give units
+        r3D  = r3D[1:];  Nmodes3D = Nmodes3D[1:];  xi3D = xi3D[1:,:]
+        for i in range(r3D.shape[0]):
+            r3D[i]    = (r3D[i]/Nmodes3D[i])*(BoxSize*1.0/grid)
+            xi3D[i,0] = (xi3D[i,0]/Nmodes3D[i])*(1.0/grid**3)
+            xi3D[i,1] = (xi3D[i,1]*5.0/Nmodes3D[i])*(1.0/grid**3)
+            xi3D[i,2] = (xi3D[i,2]*9.0/Nmodes3D[i])*(1.0/grid**3)
+        self.r3D = np.asarray(r3D);  self.Nmodes3D = np.asarray(Nmodes3D)
+        self.xi = np.asarray(xi3D)
+
+        print('Time taken = %.2f seconds'%(time.time()-start))
+################################################################################
+################################################################################
 
 ################################################################################
 ################################################################################
@@ -2015,7 +2159,7 @@ class Xi:
 # fields: ['CIC','CIC','PCS',...]
 # threads -----> number of threads (OMP) used to make the FFTW
 
-class XXi:
+class XXi_multi:
     def __init__(self,delta,BoxSize,axis=2,MAS=None,threads=1):
 
         start = time.time()
@@ -2243,150 +2387,5 @@ class XXi:
 
 ################################################################################
 ################################################################################
-
-
-
-################################################################################
-################################################################################
-# This routine computes the correlation function of two density fields
-# delta1 -------> 3D density field of the first: (dims,dims,dims) numpy array
-# delta2 -------> 3D density field of the second: (dims,dims,dims) numpy array
-# BoxSize -----> size of the cubic density field
-# MAS ---------> mass assignment scheme used to compute density field
-#                needed to correct modes amplitude
-# threads -----> number of threads (OMP) used to make the FFTW
-@cython.boundscheck(False)
-@cython.cdivision(True)
-@cython.wraparound(False)
-class XXi_single:
-    def __init__(self, delta1, delta2, float BoxSize, MAS='CIC',int axis=2,threads=1):
-
-        start = time.time()
-        cdef int kxx, kyy, kzz, kx, ky, kz,dims, middle, k_index, MAS_index
-        cdef int kmax, i, k_par, k_per
-        cdef double k, prefact, mu, mu2
-        cdef double MAS_corr[3]
-        ####### change this for double precision ######
-        cdef float real, imag
-        cdef float MAS_factor
-        cdef np.complex64_t[:,:,::1] delta_k1
-        cdef np.complex64_t[:,:,::1] delta_k2
-        cdef float[:,:,::1] delta_xi
-        ###############################################
-        cdef double[::1] r3D, Nmodes3D
-        cdef double[:,::1] xi3D
-
-        # find dimensions of delta: we assume is a (dims,dims,dims) array
-        # determine the different frequencies and the MAS_index
-        #print('\nComputing correlation function of the field...')
-        #dims = delta.shape[0];  middle = dims//2
-        #kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,dims)
-        #MAS_index = MAS_function(MAS)
-        print('\nComputing correlation function of the field...')
-        dims = delta1.shape[0];  dims_tmp = delta2.shape[0]; middle = dims//2
-        kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,dims)
-        MAS_index = MAS_function(MAS)
-        if dims != dims_tmp:
-            print("Fields have different shapes!")
-            quit()
-
-        ## compute FFT of the field (change this for double precision) ##
-        delta_k1 = FFT3Dr_f(delta1,threads)
-        delta_k2 = FFT3Dr_f(delta2,threads)
-        #################################
-
-        # for each mode correct for MAS and compute |delta(k)^2|
-        prefact = np.pi/dims
-        for kxx in range(dims):
-            kx = (kxx-dims if (kxx>middle) else kxx)
-            MAS_corr[0] = MAS_correction(prefact*kx,MAS_index)
-
-            for kyy in range(dims):
-                ky = (kyy-dims if (kyy>middle) else kyy)
-                MAS_corr[1] = MAS_correction(prefact*ky,MAS_index)
-
-                for kzz in range(middle+1):
-                    kz = (kzz-dims if (kzz>middle) else kzz)
-                    MAS_corr[2] = MAS_correction(prefact*kz,MAS_index)  
-
-                    # correct modes amplitude for MAS
-                    MAS_factor = MAS_corr[0]*MAS_corr[1]*MAS_corr[2]
-                    delta_k1[kxx,kyy,kzz] = delta_k1[kxx,kyy,kzz]*MAS_factor
-                    delta_k2[kxx,kyy,kzz] = delta_k2[kxx,kyy,kzz]*MAS_factor
-                    
-                    # compute |delta(k)^2|
-                    real1 = delta_k1[kxx,kyy,kzz].real
-                    imag1 = delta_k1[kxx,kyy,kzz].imag
-                    real2 = delta_k2[kxx,kyy,kzz].real
-                    imag2 = delta_k2[kxx,kyy,kzz].imag
-                    delta_k1[kxx,kyy,kzz].real = real1*real2 + imag1*imag2
-                    delta_k1[kxx,kyy,kzz].imag = 0.
-
-        ## compute IFFT of the field (change this for double precision) ##
-        delta_xi = IFFT3Dr_f(delta_k1,threads);  del delta_k1, delta_k2
-        #################################
-
-        # define arrays containing r3D, xi3D and Nmodes3D. We need kmax+1
-        # bins since the mode (middle,middle, middle) has an index = kmax
-        r3D      = np.zeros(kmax+1,     dtype=np.float64)
-        xi3D     = np.zeros((kmax+1,3), dtype=np.float64)
-        Nmodes3D = np.zeros(kmax+1,     dtype=np.float64)
-
-        # do a loop over the independent modes.
-        # compute k,k_par,k_per, mu for each mode. k's are in kF units
-        start2 = time.time()
-        for kxx in range(dims):
-            kx = (kxx-dims if (kxx>middle) else kxx)
-        
-            for kyy in range(dims):
-                ky = (kyy-dims if (kyy>middle) else kyy)
-
-                for kzz in range(dims): #kzz=[0,1,..,middle] --> kz>0
-                    kz = (kzz-dims if (kzz>middle) else kzz)
-
-                    # compute |k| of the mode and its integer part
-                    k       = sqrt(kx*kx + ky*ky + kz*kz)
-                    k_index = <int>k
-
-                    # compute the value of k_par and k_perp
-                    if axis==0:   
-                        k_par, k_per = kx, <int>sqrt(ky*ky + kz*kz)
-                    elif axis==1: 
-                        k_par, k_per = ky, <int>sqrt(kx*kx + kz*kz)
-                    else:         
-                        k_par, k_per = kz, <int>sqrt(kx*kx + ky*ky)
-
-                    # find the value of mu
-                    if k==0:  mu = 0.0
-                    else:     mu = k_par/k
-                    mu2 = mu*mu
-
-                    # take the absolute value of k_par
-                    if k_par<0: k_par = -k_par
-
-                    # Xi3D
-                    r3D[k_index]      += k
-                    xi3D[k_index,0]   +=  delta_xi[kxx,kyy,kzz]
-                    xi3D[k_index,1]   += (delta_xi[kxx,kyy,kzz]*(3.0*mu2-1.0)/2.0)
-                    xi3D[k_index,2]   += (delta_xi[kxx,kyy,kzz]*(35.0*mu2*mu2 - 30.0*mu2 + 3.0)/8.0)
-                    Nmodes3D[k_index] += 1.0
-
-
-        print('Time to complete loop = %.2f'%(time.time()-start2))
-
-        # Xi3D. Discard DC mode bin and give units
-        r3D  = r3D[1:];  Nmodes3D = Nmodes3D[1:];  xi3D = xi3D[1:,:]
-        for i in range(r3D.shape[0]):
-            r3D[i]    = (r3D[i]/Nmodes3D[i])*(BoxSize*1.0/dims)
-            xi3D[i,0] = (xi3D[i,0]/Nmodes3D[i])*(1.0/dims**3)
-            xi3D[i,1] = (xi3D[i,1]*5.0/Nmodes3D[i])*(1.0/dims**3)
-            xi3D[i,2] = (xi3D[i,2]*9.0/Nmodes3D[i])*(1.0/dims**3)
-        self.r3D = np.asarray(r3D);  self.Nmodes3D = np.asarray(Nmodes3D)
-        self.xi = np.asarray(xi3D)
-
-        print('Time taken = %.2f seconds'%(time.time()-start))
-################################################################################
-################################################################################
-
 
 
