@@ -253,7 +253,8 @@ def read_block(filename, block, parttype=-1, no_mass_replicate=False, verbose=Fa
   filenum = head.filenum
   del head
 
-  if (datablocks.has_key(block)):
+  #if (datablocks.has_key(block)):
+  if block in datablocks:
         block_name=datablocks[block][0]
         dim2=datablocks[block][1]
         first=True
@@ -407,7 +408,8 @@ def write_block(f, block, parttype, data):
     else:
         group=f.root._f_get_child(part_name)
     
-    if (datablocks.has_key(block)):
+    #if (datablocks.has_key(block)):
+    if block in datablocks:
         block_name=datablocks[block][0]
         dim2=datablocks[block][1]
         if (group.__contains__(block_name)==False):
