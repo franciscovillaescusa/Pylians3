@@ -29,7 +29,7 @@ An example of how to use this routine is this:
    # halo mass function parameters
    f_Pk   = 'Pk_linear_z=0.txt'  #file with linear Pk
    OmegaM = 0.3175
-   Masses = np.logspace(1e11, 1e15, 100) #array with halo masses
+   Masses = np.logspace(11, 15, 100) #array with halo masses
    author = 'ST'   #Sheth-Tormen halo mass function
    bins   = 10000  #number of bins to use for Pk
    z      = 0.0    #redshift; only used for Tinker, Tinker10 and Crocce

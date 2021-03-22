@@ -53,6 +53,10 @@ We recommend using this method since you will know exactly where the libraries a
 
    Note that Pylians3 works with python3. In some systems, you may need to use ``python3`` instead of ``python`` when compiling the libraries.
 
+.. note::
+
+   You may need to add specific compilation flags for your system in the case the above procedure fails. For instance, for a Power9 system such as CINECA Marconi 100 you will need to add these compilations flags to  ``extra_compilation_args``: ``'-mcpu=powerpc64le'`` and ``'-mtune=powerpc64le'``.
+
 
 -----
 

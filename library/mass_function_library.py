@@ -178,11 +178,12 @@ def Tinker_2010_mass_function(k, Pk, rhoM, Masses, z, delta=200.0):
         fnu = alpha*(1.0+(beta*nu)**(-2.0*phi))*nu**(2.0*eta)*\
             np.exp(-gamma*nu**2/2.0)
 
-        Mp  = M*1.01;  Rp = (3.0*Mp/(4.0*pi*rhoM))**(1.0/3.0)
-        nup = 1.686/sigma(k,Pk,Rp)
-        dlnnu_dlnM = np.log(nup-nu)/np.log(Mp-M)
+        #Mp  = M*1.01;  Rp = (3.0*Mp/(4.0*pi*rhoM))**(1.0/3.0)
+        #nup = 1.686/sigma(k,Pk,Rp)
+        #dlnnu_dlnM = np.log(nup-nu)/np.log(Mp-M)
 
-        dndM[i] = -(rhoM/M**2)*(nu*fnu)*dlnnu_dlnM
+        #dndM[i] = -(rhoM/M**2)*(nu*fnu)*dlnnu_dlnM
+        dndM[i] = -(rhoM/M)*dSdM(k,Pk,rhoM,M)/sigma(k,Pk,R)*(nu*fnu)
 
     return dndM
     
