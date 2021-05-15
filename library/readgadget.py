@@ -26,17 +26,29 @@ class header:
 
         if fformat=='hdf5':
             f             = h5py.File(filename, 'r')
+            
             self.time     = f['Header'].attrs[u'Time']
             self.redshift = f['Header'].attrs[u'Redshift']
-            self.boxsize  = f['Header'].attrs[u'BoxSize']
-            self.filenum  = f['Header'].attrs[u'NumFilesPerSnapshot']
-            self.omega_m  = f['Header'].attrs[u'Omega0']
-            self.omega_l  = f['Header'].attrs[u'OmegaLambda']
-            self.hubble   = f['Header'].attrs[u'HubbleParam']
+            self.npart    = (f['Header'].attrs[u'NumPart_ThisFile']).astype(np.int64)
+            self.nall     = (f['Header'].attrs[u'NumPart_Total']).astype(np.int64)
+            self.filenum  = int(f['Header'].attrs[u'NumFilesPerSnapshot'])
             self.massarr  = f['Header'].attrs[u'MassTable']
-            self.npart    = f['Header'].attrs[u'NumPart_ThisFile']
-            self.nall     = f['Header'].attrs[u'NumPart_Total']
-            self.cooling  = f['Header'].attrs[u'Flag_Cooling']
+            self.boxsize  = f['Header'].attrs[u'BoxSize']
+
+            # check if it is a Gadget-4 snapshot
+            if '/Parameters' in f.keys():
+                self.omega_m  = f['Parameters'].attrs[u'Omega0']
+                self.omega_l  = f['Parameters'].attrs[u'OmegaLambda']
+                self.hubble   = f['Parameters'].attrs[u'HubbleParam']
+                #self.cooling  = f['Parameters'].attrs[u'Flag_Cooling']
+
+            # if it is a traditional Gadget-1/2/3 snapshot
+            else:
+                self.omega_m  = f['Header'].attrs[u'Omega0']
+                self.omega_l  = f['Header'].attrs[u'OmegaLambda']
+                self.hubble   = f['Header'].attrs[u'HubbleParam']
+                #self.cooling  = f['Header'].attrs[u'Flag_Cooling']
+
             self.format   = 'hdf5'
             f.close()
 
