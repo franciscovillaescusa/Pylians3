@@ -35,8 +35,14 @@ class header:
             self.massarr  = f['Header'].attrs[u'MassTable']
             self.boxsize  = f['Header'].attrs[u'BoxSize']
 
+            # check if it is a SWIFT snapshot
+            if '/Cosmology' in f.keys():
+                self.omega_m  = f['Cosmology'].attrs[u'Omega_m']
+                self.omega_l  = f['Cosmology'].attrs[u'Omega_lambda']
+                self.hubble   = f['Cosmology'].attrs[u'h']
+
             # check if it is a Gadget-4 snapshot
-            if '/Parameters' in f.keys():
+            elif '/Parameters' in f.keys():
                 self.omega_m  = f['Parameters'].attrs[u'Omega0']
                 self.omega_l  = f['Parameters'].attrs[u'OmegaLambda']
                 self.hubble   = f['Parameters'].attrs[u'HubbleParam']
