@@ -1668,13 +1668,14 @@ def correct_MAS(delta,BoxSize,MAS='CIC',threads=1):
 # Pk ----------> input Pk array
 # BoxSize -----> size of the cubic box
 # dims --------> grid size
+# bins --------> number of bins in the interpolated Pk
 @cython.boundscheck(False)
 @cython.cdivision(True)
 @cython.wraparound(False)
 def expected_Pk(np.float32_t[:] k_in, np.float32_t[:] Pk_in, 
-                float BoxSize, int dims):
+                float BoxSize, int dims, int bins=750):
 
-    cdef int k_len, i, j, bins
+    cdef int k_len, i, j
     cdef int kx, kxx, ky, kyy, kz, kzz, middle, k_index
     cdef float kF, kN, k0, k, Pk_interp
     cdef float kmin_in, kmax_in, deltak
@@ -1685,7 +1686,6 @@ def expected_Pk(np.float32_t[:] k_in, np.float32_t[:] Pk_in,
 
     middle = dims//2
     kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,dims)
-    bins = 750 #number of bins in the interpolated k_input,Pk_input
 
     # check if input Pk is sorted
     k_len = k_in.shape[0]
