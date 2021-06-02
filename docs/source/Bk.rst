@@ -27,8 +27,8 @@ Pylians computes the amplitude of the bispectrum, and reduced bispectrum, for tr
    theta   = np.linspace(0, np.pi, 25) #array with the angles between k1 and k2
 
    # compute bispectrum
-   Bk = PKL.Bk(delta, BoxSize, k1, k2, theta, MAS, threads)
-   Bk = Bk.B     #bispectrum
-   Qk = Bk.Q     #reduced bispectrum
-   k  = Bk.k     #k-bins for power spectrum
-   Pk = Bk.Pk    #power spectrum
+   BBk = PKL.Bk(delta, BoxSize, k1, k2, theta, MAS, threads)
+   Bk  = BBk.B     #bispectrum
+   Qk  = BBk.Q     #reduced bispectrum
+   k   = BBk.k     #k-bins for power spectrum
+   Pk  = BBk.Pk    #power spectrum
