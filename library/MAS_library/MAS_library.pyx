@@ -854,6 +854,9 @@ cpdef void projected_voronoi(np.float64_t[:,:] field, np.float32_t[:,:] pos,
 
                 # if particles in the shell are all within the same pixel
                 if (index_xm==index_xp) and (index_ym==index_yp):
+
+                    if (index_xm<0) or (index_xm>=grid):  continue
+                    if (index_ym<0) or (index_ym>=grid):  continue
                     index_x = (index_xm + grid)%grid
                     index_y = (index_ym + grid)%grid
                     for k in range(count, tracers):
