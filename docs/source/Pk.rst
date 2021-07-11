@@ -68,7 +68,7 @@ Pylians also provides routines to compute the auto- and cross-power spectrum of 
 		
    import Pk_library as PKL
 
-   Pk = PKL.XPk([delta1,delta2], BoxSize, axis, MAS=['CIC','CIC'], threads)
+   Pk = PKL.XPk([delta1,delta2], BoxSize, axis, MAS=['CIC','CIC'], threads=1)
 
 A description of the variables ``BoxSize``, ``axis``, ``MAS`` and ``threads`` can be found in :ref:`auto-Pk`. As with the auto-power spectrum, ``delta1`` and ``delta2`` need to be 3D float numpy arrays. ``Pk`` is a python class that contains all the following information
 
