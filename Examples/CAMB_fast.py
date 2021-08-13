@@ -26,6 +26,11 @@ pivot_tensor = 0.05
 redshifts    = [0.0, 0.5, 1, 2, 3, 127] 
 kmax         = 10.0
 k_per_logint = 10
+
+# CAMB accuracy
+AccuracyBoost  = 5.0 
+lSampleBoost   = 5.0 
+lAccuracyBoost = 5.0
 ###############################################################################
 
 result = CL.PkL(Omega_m=Omega_m, Omega_b=Omega_b, h=h, ns=ns, s8=s8,
@@ -33,11 +38,14 @@ result = CL.PkL(Omega_m=Omega_m, Omega_b=Omega_b, h=h, ns=ns, s8=s8,
                 pivot_scalar=pivot_scalar, pivot_tensor=pivot_tensor, 
                 Nnu=Nnu, hierarchy=hierarchy, Neff=Neff, tau=tau,
                 redshifts=redshifts, kmax=kmax, k_per_logint=k_per_logint,
-                verbose=True)
+                AccuracyBoost=AccuracyBoost, lSampleBoost=lSampleBoost,
+                lAccuracyBoost=lAccuracyBoost, verbose=False)
 
 zs  = result.z
 k   = result.k
 Pkm = result.Pkmm
+Tk  = result.Tk
 
 for i,z in enumerate(zs):
     np.savetxt('Pk_m_z=%.1f.txt'%z, np.transpose([k, Pkm[i]]))
+    np.savetxt('Tk_z=%.1f.txt'%z, np.transpose(Tk[:,:,i]))

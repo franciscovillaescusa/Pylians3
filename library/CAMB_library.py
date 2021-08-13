@@ -20,7 +20,8 @@ class PkL:
                  pivot_scalar=0.05, pivot_tensor=0.05, 
                  Nnu=3, hierarchy='degenerate', Neff=3.046, tau=None,
                  redshifts=[0, 0.5, 1, 2, 3], kmax=10.0, k_per_logint=50,
-                 verbose=False):
+                 AccuracyBoost=5.0, lSampleBoost=5.0,
+                 lAccuracyBoost=5.0, verbose=False):
 
         Omega_c  = Omega_m - Omega_b - Mnu/(93.14*h**2)
         Omega_cb = Omega_c + Omega_b
@@ -28,8 +29,8 @@ class PkL:
         pars = camb.CAMBparams()
 
         # set accuracy of the calculation
-        pars.set_accuracy(AccuracyBoost=5.0, lSampleBoost=5.0, 
-                          lAccuracyBoost=5.0, HighAccuracyDefault=True, 
+        pars.set_accuracy(AccuracyBoost=AccuracyBoost, lSampleBoost=lSampleBoost, 
+                          lAccuracyBoost=lAccuracyBoost, HighAccuracyDefault=True, 
                           DoLateRadTruncation=True)
 
         # set value of the cosmological parameters
@@ -94,10 +95,17 @@ class PkL:
         self.s8 = np.array(results.get_sigma8())[::-1]*np.sqrt(factor)
         self.Hz = np.array([results.hubble_parameter(red) for red in z])
 
+        # get transfer function
+        Tk  = (results.get_matter_transfer_data()).transfer_data
+        #for j,z in enumerate(redshifts):
+        #    fout = 'ICs/Tk_m_z=%s.txt'%z
+        #    np.savetxt(fout, np.transpose(Tk[:,:,j]))
+
         self.z    = z;    self.k   = k 
         self.Pkmm = Pmm*factor;  self.Pknn = Pnn*factor
         self.Pkcc = Pcc*factor;  self.Pkbb = Pbb*factor;  self.Pkcb = Pcb*factor
-        
+        self.Tk   = Tk
+
         if verbose:  print(pars)
         
         #fout = 'Pk_trans_z=%.3f.txt'%z
