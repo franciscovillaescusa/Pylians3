@@ -68,7 +68,7 @@ Pylians also provides routines to compute the auto- and cross-power spectrum of 
 		
    import Pk_library as PKL
 
-   Pk = PKL.XPk([delta1,delta2], BoxSize, axis, MAS=['CIC','CIC'], threads)
+   Pk = PKL.XPk([delta1,delta2], BoxSize, axis, MAS=['CIC','CIC'], threads=1)
 
 A description of the variables ``BoxSize``, ``axis``, ``MAS`` and ``threads`` can be found in :ref:`auto-Pk`. As with the auto-power spectrum, ``delta1`` and ``delta2`` need to be 3D float numpy arrays. ``Pk`` is a python class that contains all the following information
 
@@ -304,6 +304,7 @@ The ingredients needed are:
 - ``Pk_in``. This is an array with the values of the power spectrum at ``k_in``. 
 - ``BoxSize``. Size of the simulation. If you want to bin the input power spectrum in the same way as the power spectrum measured from a simulation with 1000 Mpc/h, then set ``BoxSize = 1000.0``. This parameter determines the fundamental frequency.
 - ``grid``. The routine will bin the power spectrum according to a mesh with grid x grid x grid voxels. This parameters determines the Nyquist frequency.
+- ``bins``. The routine will read the input Pk and interpolate it to the k-values sampled in the regular grid. It is desirable to first interpolate the input Pk into a finer 1D mesh to avoid larger errors in the interpolation. This parameter sets the number of bins for that. The more the better, but something around 1000-5000 should be enough.
 
 An example is this:
 
@@ -316,12 +317,13 @@ An example is this:
    f_in    = 'my_linear_Pk.txt'  #input power spectrum
    BoxSize = 1000.0 #Mpc/h       #same of box to compute the binned Pk
    grid    = 256                 #compute binned Pk using a mesh with grid^3 voxels
+   bins    = 2000                #number of bins to interpolate the input Pk
    
    # read input power spectrum
    k_in, Pk_in = np.loadtxt(f_in, unpack=True)
    
    # get binned Pk: returns k, power spectrum and number of modes in each k-bin
-   k, Pk, Nmodes = PKL.expected_Pk(k_in, Pk_in, BoxSize, grid)
+   k, Pk, Nmodes = PKL.expected_Pk(k_in, Pk_in, BoxSize, grid, bins)
 
 
 2D
