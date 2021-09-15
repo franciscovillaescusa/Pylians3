@@ -2,8 +2,6 @@
 from mpi4py import MPI
 import numpy as np
 #import snapshot as sn
-import sys
-sys.path.insert(1,'/home/gabriele/Softwares/illustris_python')
 import groupcat
 import readsnapHDF5 as rs
 import HI_library as HIL
