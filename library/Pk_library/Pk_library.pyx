@@ -2392,11 +2392,10 @@ class XXi_multi:
 ################################################################################
 ################################################################################
 # This routine computes the projected cross-correlation function of two density fields
-# delta1 ------> 2D density field: (grid,grid,grid) numpy array
-# delta2 ------> 2D density field: (grid,grid,grid) numpy array
+# delta1 ------> 2D density field: (grid,grid) numpy array
+# delta2 ------> 2D density field: (grid,grid) numpy array
 # BoxSize -----> size of the quadratic density field
-# MAS1 --------> mass assignment scheme used to compute the density field 1
-# MAS2 --------> mass assignment scheme used to compute the density field 2
+# MAS ---------> 2-ple of strings, mass assignment scheme used to compute the two density fields
 # threads -----> number of threads (OMP) used to make the FFTW
 @cython.boundscheck(False)
 @cython.cdivision(True)
