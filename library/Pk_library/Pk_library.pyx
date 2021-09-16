@@ -2389,3 +2389,120 @@ class XXi_multi:
 ################################################################################
 
 
+################################################################################
+################################################################################
+# This routine computes the projected cross-correlation function of two density fields
+# delta1 ------> 2D density field: (grid,grid) numpy array
+# delta2 ------> 2D density field: (grid,grid) numpy array
+# BoxSize -----> size of the quadratic density field
+# MAS ---------> 2-ple of strings, mass assignment scheme used to compute the two density fields
+# threads -----> number of threads (OMP) used to make the FFTW
+@cython.boundscheck(False)
+@cython.cdivision(True)
+@cython.wraparound(False)
+class XXi_projected:
+    def __init__(self, delta1, delta2, float BoxSize, MAS=['CIC','CIC'],
+                 threads=1):
+
+        start = time.time()
+        cdef int kxx, kyy, kx, ky, grid, middle, k_index
+        cdef int MAS_index1, MAS_index2
+        cdef int kmax, i
+        cdef double k, prefact
+        cdef double[:,:] MAS_corr
+        ####### change this for double precision ######
+        cdef float real1, real2, imag1, imag2
+        cdef float MAS_factor
+        cdef np.complex64_t[:,::1] delta1_k, delta2_k
+        cdef np.ndarray[np.float32_t,ndim=2] delta_xi
+        ###############################################
+        cdef double[::1] r_p, Nmodes_p
+        cdef double[::1] xi_p
+
+        MAS_corr = np.zeros((2,2), dtype=np.float64)
+
+        # find dimensions of delta: we assume is a (grid,grid,grid) array
+        # determine the different frequencies and the MAS_index
+        print('\nComputing correlation function of the field...')
+        grid = delta1.shape[0];  middle = grid//2
+        if grid!=delta2.shape[0]:  raise Exception('grid sizes differ!!!')
+        # Change kmax for 2D
+        #kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,grid)
+        kmax = int((grid//2)*np.sqrt(2))
+        MAS_index1 = MAS_function(MAS[0])
+        MAS_index2 = MAS_function(MAS[1])
+        ## compute FFT of the fields (change this for double precision) ##
+        delta1_k = FFT2Dr_f(delta1,threads)
+        delta2_k = FFT2Dr_f(delta2,threads)
+        #################################
+
+        # for each mode correct for MAS and compute |delta(k)^2|
+        prefact = np.pi/grid
+        for kxx in range(grid):
+            kx = (kxx-grid if (kxx>middle) else kxx)
+            MAS_corr[0,0] = MAS_correction(prefact*kx,MAS_index1)
+            MAS_corr[1,0] = MAS_correction(prefact*kx,MAS_index2)
+
+            for kyy in range(middle+1):
+                ky = (kyy-grid if (kyy>middle) else kyy)
+                MAS_corr[0,1] = MAS_correction(prefact*ky,MAS_index1)
+                MAS_corr[1,1] = MAS_correction(prefact*ky,MAS_index2)
+
+                # correct modes amplitude for MAS
+                MAS_factor = MAS_corr[0,0]*MAS_corr[0,1]
+                delta1_k[kxx,kyy] = delta1_k[kxx,kyy]*MAS_factor
+                MAS_factor = MAS_corr[1,0]*MAS_corr[1,1]
+                delta2_k[kxx,kyy] = delta2_k[kxx,kyy]*MAS_factor
+                    
+                # compute |delta(k)^2|
+                real1 = delta1_k[kxx,kyy].real
+                imag1 = delta1_k[kxx,kyy].imag
+                real2 = delta2_k[kxx,kyy].real
+                imag2 = delta2_k[kxx,kyy].imag
+                delta1_k[kxx,kyy].real = real1*real2 + imag1*imag2
+                delta1_k[kxx,kyy].imag = 0.0
+
+        ## compute IFFT of the field (change this for double precision) ##
+        delta_xi = IFFT2Dr_f(delta1_k,threads);  del delta1_k, delta2_k
+        #################################
+
+
+        # define arrays containing r_p, xi_p and Nmodes_p. We need kmax+1
+        # bins since the mode (middle,middle, middle) has an index = kmax
+        r_p      = np.zeros(kmax+1, dtype=np.float64)
+        xi_p     = np.zeros(kmax+1, dtype=np.float64)
+        Nmodes_p = np.zeros(kmax+1, dtype=np.float64)
+
+        # do a loop over the independent modes.
+        start2 = time.time()
+        for kxx in range(grid):
+            kx = (kxx-grid if (kxx>middle) else kxx)
+        
+            for kyy in range(grid):
+                ky = (kyy-grid if (kyy>middle) else kyy)
+
+                # compute |k| of the mode and its integer part
+                k       = sqrt(kx*kx + ky*ky)
+                k_index = <int>k
+
+                # Xi_p
+                r_p[k_index]      += k
+                xi_p[k_index]     += delta_xi[kxx,kyy]
+                Nmodes_p[k_index] += 1.0
+
+
+        print('Time to complete loop = %.2f'%(time.time()-start2))
+
+        # Xi_p. Discard DC mode bin and give units
+        r_p  = r_p[1:];  Nmodes_p = Nmodes_p[1:];  xi_p = xi_p[1:]
+        for i in range(r_p.shape[0]):
+            r_p[i]  = (r_p[i]/Nmodes_p[i])*(BoxSize*1.0/grid)
+            xi_p[i] = (xi_p[i]/Nmodes_p[i])*(1.0/grid**2)
+        self.r_p  = np.asarray(r_p);  self.Nmodes_p = np.asarray(Nmodes_p)
+        self.xi_p = np.asarray(xi_p)
+
+        print('Time taken = %.2f seconds'%(time.time()-start))
+################################################################################
+################################################################################
+
+
