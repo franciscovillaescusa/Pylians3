@@ -2,6 +2,7 @@
 import numpy as np 
 import readfof
 import sys,os,argparse
+import time
 
 
 parser = argparse.ArgumentParser(description="This routine reads a FoF catalogue with multiple subfiles and compress it to a single file")
@@ -37,9 +38,9 @@ for snapnum in snapnums:
         # find the number of files in the directory
         files = len(os.listdir(FoF_folder))
         if files<=2:
-            print 'Only %d files found!!!'%files;  continue
+            print('Only %d files found!!!'%files);  continue
 
-        print "\n%s folder exists : contains %d files"%(FoF_folder,files)
+        print("\n%s folder exists : contains %d files"%(FoF_folder,files))
 
         # create new FoF file
         f_tab = '%s/group_tab_%03d.0'%(snapdir,snapnum)
@@ -65,10 +66,10 @@ for snapnum in snapnums:
                                        SFR=SFR, read_IDs=not(no_read_ids), 
                                        prefix='/original_groups_')
 
-        for [attr1, value1], [attr2, value2] in zip(catalog1.__dict__.iteritems(), catalog2.__dict__.iteritems()):
+        for [attr1, value1], [attr2, value2] in zip(catalog1.__dict__.items(), catalog2.__dict__.items()):
             if '%s'%attr1 in ['Ngroups','Nids', 'Nfiles']:  continue
-            print '%s'%attr1
+            print('%s'%attr1)
             if not(np.array_equal(value1, value2)):
                 raise Exception('different %s: %s vs %s'%(attr1,value1,value2))
-        print 'Verified that the above arrays are the same in the old and new files'
-
+        print('Verified that the above arrays are the same in the old and new files')
+        
