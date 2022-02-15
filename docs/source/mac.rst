@@ -38,3 +38,13 @@ We recommend installing all packages, with the exception of openmp, with `anacon
 These instructions have been tested on High Sierra.
 
 Many thanks to Alexander Gough for this!
+
+.. note::
+
+   For M1 mac users the instructions are similar but:
+
+   - verify that clang version is >=13
+   - replace “-march=native” by “mcpu=apple-m1”
+   - use CC=clang python setup.py install
+
+   Thanks for Valerio Marra for this!
