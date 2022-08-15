@@ -65,8 +65,8 @@ with open("README.md", "r") as f:
     documentation = f.read()
 
 setup(
-    name         = 'Pylians3',
-    version      = "0.1", 
+    name         = 'Pylians',
+    version      = "0.2", 
     author       = 'Francisco Villaescusa-Navarro',
     author_email = 'villaescusa.francisco@gmail.com',
     description  = "Python libraries for the analysis of numerical simulations",
