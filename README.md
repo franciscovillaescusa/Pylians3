@@ -4,10 +4,10 @@ Pylians stands for **Py**thon **li**braries for the **a**nalysis of **n**umerica
 
 ## Installation
 
-For the stable version:
+For the stable version do:
 
 ``` sh
-pip3 install Pylians3
+pip install Pylians
 ```
 
 For the development version do
@@ -15,8 +15,11 @@ For the development version do
 ```sh 
 git clone https://github.com/franciscovillaescusa/Pylians3.git
 cd Pylians3
-pip3 install .
+pip install .
 ```
+
+Use pip3 instad of pip for python3.
+
 
 ## Usage
 
