@@ -23,7 +23,7 @@ that would be installed automatically by pip when invoking the above command. No
 
 To upgrade to a newer version type:
 
-.. code-bash::
+.. code-block::
 
    python -m pip install --upgrade Pylians
 
