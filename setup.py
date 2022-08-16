@@ -74,7 +74,7 @@ setup(
     license      = 'MIT',
     long_description_content_type = "text/markdown",
     long_description = documentation,
-    packages=find_packages(),
+    packages=find_packages(where="library/"),
     ext_modules  = cythonize(ext_modules, 
                             compiler_directives={'language_level' : "3"},
                             include_path=['library/MAS_library/',
