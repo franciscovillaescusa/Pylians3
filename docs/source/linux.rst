@@ -2,63 +2,41 @@
 Linux
 *****
 
-Pylians3 make use of these packages:
-
-- numpy
-- scipy
-- h5py
-- pyfftw
-- mpi4py
-- cython
-- openmp
- 
-We recommend installing all packages, with the exception of openmp, with `anaconda <https://www.anaconda.com/download/?lang=en-us)>`_.
-
-.. warning::
-
-   When facing problems installing openmp, its functionality can be disabled by removing the -fopenmp flags in the library/setup.py file.
-
-
-Pylians3 can be installed in two ways:
-
-
-Option 1
---------
-
 .. code-block:: bash
 
-   cd library
-   python setup.py install
+   python -m pip install Pylians
 
 
-Option 2
---------
+Pylians make use of these packages
 
-.. code-block:: bash
+- ``numpy``
+- ``scipy``
+- ``h5py``
+- ``pyfftw``
+- ``cython``
 
-   cd library
-   python setup.py build
+that would be installed automatically by pip when invoking the above command. Note that Pylians also requires a working openmp environment. This needs to be installed separately before invoking the pip command.
 
-the compiled libraries and scripts will be located in build/lib.XXX, where XXX depends on your machine. E.g. build/lib.linux-x86_64-3.7 or build/lib.macosx-10.7-x86_64-3.7
+.. note::
 
-Add that folder to your PYTHONPATH in ~/.bashrc
+   Pylians works for both python2 and python3. Depending on what your python is, it will install accordingly. Sometimes, python3 needs to ne invoked explicitly as ``python3``. If so, install as ``python3 -m pip install Pylians``.
 
-.. code-block:: bash
+To upgrade to a newer version type:
+
+.. code-bash::
+
+   python -m pip install --upgrade Pylians
+
+---------
    
-   export PYTHONPATH=$PYTHONPATH:$HOME/Pylians3/library/build/lib.linux-x86_64-3.7
 
-We recommend using this method since you will know exactly where the libraries are. If you want to uninstall Pylians3 and have used this option, just delete build folder.
+The development version can be installed as follows:
 
-.. note::
+.. code-block:: bash
 
-   Note that Pylians3 works with python3. In some systems, you may need to use ``python3`` instead of ``python`` when compiling the libraries.
-
-.. note::
-
-   You may need to add specific compilation flags for your system in the case the above procedure fails. For instance, for a Power9 system such as CINECA Marconi 100 you will need to add these compilations flags to  ``extra_compilation_args``: ``'-mcpu=powerpc64le'`` and ``'-mtune=powerpc64le'``.
-
-
------
+   git clone https://github.com/franciscovillaescusa/Pylians3.git
+   cd Pylians3
+   python setup.py install
 
 To verify that the installation was successful do
 
@@ -66,4 +44,14 @@ To verify that the installation was successful do
 
    python Tests/import_libraries.py
 
-If no output is produced, everything went fine.
+If no output is produced, everything went fine.   
+  
+.. note::
+
+   When facing problems installing Pylians due to openmp, its functionality can be disabled by removing the -fopenmp flags in the ``setup.py`` file.
+
+.. note::
+
+   You may need to add specific compilation flags for your system in the case the above procedure fails. For instance, for a Power9 system such as CINECA Marconi 100 you will need to add these compilations flags to  ``extra_compilation_args``: ``'-mcpu=powerpc64le'`` and ``'-mtune=powerpc64le'``.
+
+
