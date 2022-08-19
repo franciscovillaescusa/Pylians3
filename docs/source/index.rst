@@ -21,8 +21,7 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    :maxdepth: 1
    :caption: Installation
 
-   linux
-   mac
+   installation
 
 .. _density_fields:
 .. toctree:: 
