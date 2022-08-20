@@ -1,2 +1,2 @@
-six 
+sphinx>5
 sphinx-tabs
