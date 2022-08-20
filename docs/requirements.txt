@@ -1,3 +1,3 @@
-sphinx>5
+sphinx>=5.1.1
 sphinx-tabs
-pigments>2.13
+pigments
