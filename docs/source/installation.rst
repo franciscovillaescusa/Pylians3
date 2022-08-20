@@ -32,7 +32,7 @@ Installation
 
 	    .. note::
 
-	       You may need to add specific compilation flags for your system in the case the above procedure fails. For instance, for a Power9 system such as CINECA Marconi 100 you will need to add these compilations flags to  ``extra_compilation_args``: ``'-mcpu=powerpc64le'`` and ``'-mtune=powerpc64le'``.
+	       You may need to add specific compilation flags for your system if the above procedure fails. For instance, for a Power9 system such as CINECA Marconi 100 you need to add these compilations flags to ``extra_compilation_args``: ``'-mcpu=powerpc64le'`` and ``'-mtune=powerpc64le'``.
 
 
    .. tab:: Mac
