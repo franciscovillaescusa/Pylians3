@@ -1,3 +1,3 @@
 [build-system]
-requires = ["setuptools", "Cython", "pyfftw", "h5py", "scipy"]
+requires = ["setuptools", "Cython", "numpy"]
 build-backend = "setuptools.build_meta"
