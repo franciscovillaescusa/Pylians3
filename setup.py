@@ -1,11 +1,13 @@
-from platform import machine
+from platform import machine, system
 
 import numpy
 from Cython.Build import cythonize
 from setuptools import Extension, find_packages, setup
 
 
-is_m1 = machine() == "arm64"
+is_mac = system() == "darwin"
+is_arm = machine() == "arm64"
+is_m1 = is_mac and is_arm
 
 arch_flag = "-mcpu=apple-m1" if is_m1 else "-march=native"
 omp_flag = "-Xpreprocessor -fopenmp" if is_m1 else "-fopenmp"
@@ -104,7 +106,11 @@ setup(
         ],
     ),
     include_dirs=[numpy.get_include()],
-    install_requires=["h5py", "pyfftw; platform_machine!='arm64'", "scipy"],
+    install_requires=[
+        "h5py",
+        "pyfftw; platform_system!='darwin' and platform_machine!='arm64'",
+        "scipy",
+    ],
     package_dir={"": "library/"},
     py_modules=[
         "bias_library",
