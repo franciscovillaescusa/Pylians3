@@ -5,7 +5,7 @@ from Cython.Build import cythonize
 from setuptools import Extension, find_packages, setup
 
 
-is_mac = system() == "darwin"
+is_mac = system() == "Darwin"
 is_arm = machine() == "arm64"
 is_m1 = is_mac and is_arm
 
@@ -108,7 +108,7 @@ setup(
     include_dirs=[numpy.get_include()],
     install_requires=[
         "h5py",
-        "pyfftw; platform_system!='darwin' and platform_machine!='arm64'",
+        "pyfftw; platform_system!='Darwin' and platform_machine!='arm64'",
         "scipy",
     ],
     package_dir={"": "library/"},
