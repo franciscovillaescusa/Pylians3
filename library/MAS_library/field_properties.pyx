@@ -23,7 +23,7 @@ cpdef potential(delta, float Omega_m, float a, MAS='CIC', threads=1):
 
     # get dimensions of the grid
     grid = delta.shape[0];  middle = grid//2
-    MAS_index = MASL.MAS_function(MAS)
+    MAS_index = PKL.MAS_function(MAS)
 
     ## compute FFT of the field (change this for double precision) ##
     delta_k = PKL.FFT3Dr_f(delta, threads)
@@ -81,7 +81,7 @@ class tidal_tensor:
 
         # get dimensions of the grid
         grid = delta.shape[0];  middle = grid//2
-        MAS_index = MASL.MAS_function(MAS)
+        MAS_index = PKL.MAS_function(MAS)
 
         # define the different tidal tensor arrays
         T00_k = np.zeros((grid,grid,middle+1), dtype=np.complex64)
