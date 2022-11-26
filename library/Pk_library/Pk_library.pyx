@@ -1359,7 +1359,7 @@ def XPk_dv(delta,Vx,Vy,Vz,BoxSize,axis=2,MAS='CIC',threads=1):
     # determine the different frequencies, the MAS_index and the MAS_corr
     print('Computing power spectra of the fields...')
     dims = len(delta);  middle = dims//2
-    kF,kN,kmax = frequencies(BoxSize,dims)
+    kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,dims)
     MAS_index, MAS_corr = MAS_function(MAS)
                             
     # compute the fields (1+delta)*V
@@ -1633,7 +1633,7 @@ def XPk_2D(delta1,delta2,BoxSize,axis=2,MAS1='CIC',MAS2='CIC',threads=1):
     dims = len(delta1);  middle = dims//2
     if dims!=len(delta2):
         print('Different grids in the two fields!!!');  sys.exit()
-    kF,kN,kmax = frequencies(BoxSize,dims)
+    kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,dims)
     MAS_index1, MAS_corr1 = MAS_function(MAS1)
     MAS_index2, MAS_corr2 = MAS_function(MAS2)
 
