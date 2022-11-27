@@ -36,15 +36,15 @@ cpdef potential(delta, float Omega_m, float a, MAS='CIC', threads=1):
     start2 = time.time();  prefact = np.pi/grid
     for kxx in range(grid):
         kx = (kxx-grid if (kxx>middle) else kxx)
-        MAS_corr[0] = MASL.MAS_correction(prefact*kx,MAS_index)
+        MAS_corr[0] = PKL.MAS_correction(prefact*kx,MAS_index)
         
         for kyy in range(grid):
             ky = (kyy-grid if (kyy>middle) else kyy)
-            MAS_corr[1] = MASL.MAS_correction(prefact*ky,MAS_index)
+            MAS_corr[1] = PKL.MAS_correction(prefact*ky,MAS_index)
 
             for kzz in range(middle+1): #kzz=[0,1,..,middle] --> kz>0
                 kz = (kzz-grid if (kzz>middle) else kzz)
-                MAS_corr[2] = MASL.MAS_correction(prefact*kz,MAS_index)  
+                MAS_corr[2] = PKL.MAS_correction(prefact*kz,MAS_index)  
 
                 # avoid DC mode
                 if (kx==0 and ky==0 and kz==0):  continue
@@ -98,15 +98,15 @@ class tidal_tensor:
         prefact = np.pi/grid
         for kxx in range(grid):
             kx = (kxx-grid if (kxx>middle) else kxx)
-            MAS_corr[0] = MASL.MAS_correction(prefact*kx,MAS_index)
+            MAS_corr[0] = PKL.MAS_correction(prefact*kx,MAS_index)
         
             for kyy in range(grid):
                 ky = (kyy-grid if (kyy>middle) else kyy)
-                MAS_corr[1] = MASL.MAS_correction(prefact*ky,MAS_index)
+                MAS_corr[1] = PKL.MAS_correction(prefact*ky,MAS_index)
 
                 for kzz in range(middle+1): #kzz=[0,1,..,middle] --> kz>0
                     kz = (kzz-grid if (kzz>middle) else kzz)
-                    MAS_corr[2] = MASL.MAS_correction(prefact*kz,MAS_index)  
+                    MAS_corr[2] = PKL.MAS_correction(prefact*kz,MAS_index)  
 
                     # avoid DC mode
                     if (kx==0 and ky==0 and kz==0):  continue
