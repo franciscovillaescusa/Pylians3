@@ -1360,7 +1360,7 @@ def XPk_dv(delta,Vx,Vy,Vz,BoxSize,axis=2,MAS='CIC',threads=1):
     print('Computing power spectra of the fields...')
     dims = len(delta);  middle = dims//2
     kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,dims)
-    MAS_index, MAS_corr = MAS_function(MAS)
+    MAS_index = MAS_function(MAS)
                             
     # compute the fields (1+delta)*V
     Vx *= (1.0 + delta);  Vy *= (1.0 + delta);  Vz *= (1.0 + delta)
@@ -1634,8 +1634,8 @@ def XPk_2D(delta1,delta2,BoxSize,axis=2,MAS1='CIC',MAS2='CIC',threads=1):
     if dims!=len(delta2):
         print('Different grids in the two fields!!!');  sys.exit()
     kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,dims)
-    MAS_index1, MAS_corr1 = MAS_function(MAS1)
-    MAS_index2, MAS_corr2 = MAS_function(MAS2)
+    MAS_index1 = MAS_function(MAS1)
+    MAS_index2 = MAS_function(MAS2)
 
     # find maximum wavenumbers, in kF units, along the par and perp directions
     imax_par = middle 
