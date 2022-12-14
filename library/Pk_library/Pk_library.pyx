@@ -1361,6 +1361,7 @@ def XPk_dv(delta,Vx,Vy,Vz,BoxSize,axis=2,MAS='CIC',threads=1):
     dims = len(delta);  middle = dims//2
     kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,dims)
     MAS_index = MAS_function(MAS)
+    MAS_corr = np.zeros(3, dtype=np.float64)
                             
     # compute the fields (1+delta)*V
     Vx *= (1.0 + delta);  Vy *= (1.0 + delta);  Vz *= (1.0 + delta)
@@ -1636,6 +1637,8 @@ def XPk_2D(delta1,delta2,BoxSize,axis=2,MAS1='CIC',MAS2='CIC',threads=1):
     kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize,dims)
     MAS_index1 = MAS_function(MAS1)
     MAS_index2 = MAS_function(MAS2)
+    MAS_corr1  = np.zeros(3, dtype=np.float64)
+    MAS_corr2  = np.zeros(3, dtype=np.float64)
 
     # find maximum wavenumbers, in kF units, along the par and perp directions
     imax_par = middle 
