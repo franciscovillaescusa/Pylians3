@@ -110,6 +110,7 @@ setup(
         "h5py",
         "pyfftw; platform_system!='Darwin' and platform_machine!='arm64'",
         "scipy",
+        "hdf5plugin",
     ],
     package_dir={"": "library/"},
     py_modules=[

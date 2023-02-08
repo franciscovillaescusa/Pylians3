@@ -1,7 +1,7 @@
 # This library is designed to read Gadget format I, format II and hdf5 files
 import numpy as np
 import readsnap
-import sys,os,h5py
+import sys,os,h5py,hdf5plugin
 
 # find snapshot name and format
 def fname_format(snapshot):

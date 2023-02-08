@@ -1,5 +1,5 @@
 import numpy as np 
-import time,sys,os,h5py
+import time,sys,os,h5py,hdf5plugin
 import readsnapHDF5 as rs
 cimport numpy as np
 cimport cython

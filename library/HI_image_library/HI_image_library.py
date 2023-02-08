@@ -5,7 +5,7 @@ import numpy as np
 import groupcat
 import readsnapHDF5 as rs
 import HI_library as HIL
-import sys,os,glob,h5py,time
+import sys,os,glob,h5py,hdf5plugin,time
 import MAS_library as MASL
 import redshift_space_library as RSL
 
