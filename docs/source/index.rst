@@ -59,6 +59,7 @@ Pylians stands for **Py**\thon **li**\braries for the **a**\nalysis of **n**\ume
    integrals
    gadget
    Pk_ics
+   tutorials
 
 .. toctree::
    :maxdepth: 2
