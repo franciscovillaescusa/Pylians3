@@ -87,7 +87,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="Pylians",
-    version="0.8",
+    version="0.9",
     author="Francisco Villaescusa-Navarro",
     author_email="villaescusa.francisco@gmail.com",
     description="Python libraries for the analysis of numerical simulations",
@@ -111,6 +111,7 @@ setup(
         "pyfftw; platform_system!='Darwin' and platform_machine!='arm64'",
         "scipy",
         "hdf5plugin",
+        "Cython<3.0.0",
     ],
     package_dir={"": "library/"},
     py_modules=[
