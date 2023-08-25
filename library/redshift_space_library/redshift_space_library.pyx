@@ -38,9 +38,16 @@ cpdef void pos_redshift_space(float[:,::1] pos, float[:,::1] vel,
     for i in range(particles):
         pos[i,axis] = pos[i,axis] + vel[i,axis]*factor
 
+        # neutrinos can cross the box multiple times
+        while pos[i,axis]<0.0:
+            pos[i,axis]+=BoxSize
+
+        if pos[i,axis]>BoxSize:
+            pos[i,axis] = (pos[i,axis])%BoxSize 
+        
         #neutrinos can cross the box multiple times. Use % for the boundary
-        if pos[i,axis]>BoxSize or pos[i,axis]<0.0:
-            pos[i,axis] = (pos[i,axis]+BoxSize)%BoxSize 
+        #if pos[i,axis]>BoxSize or pos[i,axis]<0.0:
+        #    pos[i,axis] = (pos[i,axis]+BoxSize)%BoxSize 
 ###############################################################################
 
 ################################ old routine ##################################

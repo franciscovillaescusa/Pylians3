@@ -11,7 +11,7 @@ is_m1 = is_mac and is_arm
 
 arch_flag = "-mcpu=apple-m1" if is_m1 else "-march=native"
 omp_flag = "-Xpreprocessor -fopenmp" if is_m1 else "-fopenmp"
-extra_compile_args = ["-O3", "-ffast-math", arch_flag]
+extra_compile_args = ["-O3", "-ffast-math"]
 extra_compile_args_omp = extra_compile_args.copy()
 extra_compile_args_omp.append(omp_flag)
 extra_link_args = [omp_flag]
@@ -87,7 +87,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="Pylians",
-    version="0.10",
+    version="0.11",
     author="Francisco Villaescusa-Navarro",
     author_email="villaescusa.francisco@gmail.com",
     description="Python libraries for the analysis of numerical simulations",
