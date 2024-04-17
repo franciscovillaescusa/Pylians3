@@ -87,7 +87,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="Pylians",
-    version="0.11",
+    version="0.12",
     author="Francisco Villaescusa-Navarro",
     author_email="villaescusa.francisco@gmail.com",
     description="Python libraries for the analysis of numerical simulations",

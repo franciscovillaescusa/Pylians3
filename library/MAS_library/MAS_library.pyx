@@ -3,7 +3,7 @@ import time,sys,os
 cimport numpy as np
 import scipy.integrate as SI
 cimport cython
-from libc.math cimport sqrt,pow,sin,cos,floor,fabs
+from libc.math cimport sqrt,pow,sin,cos,floor,fabs,round
 cimport MAS_c as MASC
 
 ctypedef MASC.FLOAT FLOAT
@@ -669,10 +669,10 @@ cpdef void voronoi_NGP_2D(np.float64_t[:,:] field, np.float32_t[:,:] pos,
             y_cell = pos[i,1]
 
             # see if we need to split the particle into tracers or not
-            index_xm = <int>((x_cell-R_cell-x_min)*inv_cell_size + 0.5)
-            index_xp = <int>((x_cell+R_cell-x_min)*inv_cell_size + 0.5)
-            index_ym = <int>((y_cell-R_cell-y_min)*inv_cell_size + 0.5)
-            index_yp = <int>((y_cell+R_cell-y_min)*inv_cell_size + 0.5)
+            index_xm = <int>round((x_cell-R_cell-x_min)*inv_cell_size - 0.5)
+            index_xp = <int>round((x_cell+R_cell-x_min)*inv_cell_size - 0.5)
+            index_ym = <int>round((y_cell-R_cell-y_min)*inv_cell_size - 0.5)
+            index_yp = <int>round((y_cell+R_cell-y_min)*inv_cell_size - 0.5)
 
             if (index_xm==index_xp) and (index_ym==index_yp):
                 index_x = (index_xm + grid)%grid
@@ -688,8 +688,8 @@ cpdef void voronoi_NGP_2D(np.float64_t[:,:] field, np.float32_t[:,:] pos,
                     y = y_cell + R_cell*pos_tracer[j,1]
                     w = W_cell*w_tracer[j]
 
-                    index_x = <int>((x-x_min)*inv_cell_size + 0.5)
-                    index_y = <int>((y-y_min)*inv_cell_size + 0.5)
+                    index_x = <int>round((x-x_min)*inv_cell_size - 0.5)
+                    index_y = <int>round((y-y_min)*inv_cell_size - 0.5)
                     index_x = (index_x + grid)%grid
                     index_y = (index_y + grid)%grid
                     
@@ -712,8 +712,8 @@ cpdef void voronoi_NGP_2D(np.float64_t[:,:] field, np.float32_t[:,:] pos,
                 y = y_cell + R_cell*pos_tracer[j,1]
                 w = W_cell*w_tracer[j]
 
-                index_x = <int>((x-x_min)*inv_cell_size + 0.5)
-                index_y = <int>((y-y_min)*inv_cell_size + 0.5)
+                index_x = <int>round((x-x_min)*inv_cell_size - 0.5)
+                index_y = <int>round((y-y_min)*inv_cell_size - 0.5)
 
                 if (index_x<0) or (index_x>=grid):  continue
                 if (index_y<0) or (index_y>=grid):  continue
@@ -798,10 +798,10 @@ cpdef void projected_voronoi(np.float64_t[:,:] field, np.float32_t[:,:] pos,
                 R = 0.5*(R1 + R2)*R_cell
 
                 # see if we need to split the particle into tracers or not
-                index_xm = <int>((x_cell-R-x_min)*inv_cell_size + 0.5)
-                index_xp = <int>((x_cell+R-x_min)*inv_cell_size + 0.5)
-                index_ym = <int>((y_cell-R-y_min)*inv_cell_size + 0.5)
-                index_yp = <int>((y_cell+R-y_min)*inv_cell_size + 0.5)
+                index_xm = <int>round((x_cell-R-x_min)*inv_cell_size - 0.5)
+                index_xp = <int>round((x_cell+R-x_min)*inv_cell_size - 0.5)
+                index_ym = <int>round((y_cell-R-y_min)*inv_cell_size - 0.5)
+                index_yp = <int>round((y_cell+R-y_min)*inv_cell_size - 0.5)
 
                 # if particles in the shell are all within the same pixel
                 if (index_xm==index_xp) and (index_ym==index_yp):
@@ -821,8 +821,8 @@ cpdef void projected_voronoi(np.float64_t[:,:] field, np.float32_t[:,:] pos,
                         y = y_cell + R_cell*pos_tracer[count,1]
                         w = W_cell*w_tracer[count]
 
-                        index_x = <int>((x-x_min)*inv_cell_size + 0.5)
-                        index_y = <int>((y-y_min)*inv_cell_size + 0.5)
+                        index_x = <int>round((x-x_min)*inv_cell_size - 0.5)
+                        index_y = <int>round((y-y_min)*inv_cell_size - 0.5)
                         index_x = (index_x + grid)%grid
                         index_y = (index_y + grid)%grid
                         
@@ -847,10 +847,10 @@ cpdef void projected_voronoi(np.float64_t[:,:] field, np.float32_t[:,:] pos,
                 R = 0.5*(R1 + R2)*R_cell
 
                 # see if we need to split the particle into tracers or not
-                index_xm = <int>((x_cell-R-x_min)*inv_cell_size + 0.5)
-                index_xp = <int>((x_cell+R-x_min)*inv_cell_size + 0.5)
-                index_ym = <int>((y_cell-R-y_min)*inv_cell_size + 0.5)
-                index_yp = <int>((y_cell+R-y_min)*inv_cell_size + 0.5)
+                index_xm = <int>round((x_cell-R-x_min)*inv_cell_size - 0.5)
+                index_xp = <int>round((x_cell+R-x_min)*inv_cell_size - 0.5)
+                index_ym = <int>round((y_cell-R-y_min)*inv_cell_size - 0.5)
+                index_yp = <int>round((y_cell+R-y_min)*inv_cell_size - 0.5)
 
                 # if particles in the shell are all within the same pixel
                 if (index_xm==index_xp) and (index_ym==index_yp):
@@ -874,8 +874,8 @@ cpdef void projected_voronoi(np.float64_t[:,:] field, np.float32_t[:,:] pos,
                         w = W_cell*w_tracer[count]
                         count += 1
 
-                        index_x = <int>((x-x_min)*inv_cell_size + 0.5)
-                        index_y = <int>((y-y_min)*inv_cell_size + 0.5)
+                        index_x = <int>round((x-x_min)*inv_cell_size - 0.5)
+                        index_y = <int>round((y-y_min)*inv_cell_size - 0.5)
 
                         if (index_x<0) or (index_x>=grid):  continue
                         if (index_y<0) or (index_y>=grid):  continue
@@ -937,9 +937,9 @@ cpdef void voronoi_RT_2D(double[:,::1] density, float[:,::1] pos,
             radius2 = radius[i]**2                      #(Mpc/h)^2
 
             # find cell where the particle center is and its radius in cell units
-            index_x = <int>((pos[i,axis_x]-x_min)*inv_cell_size)
-            index_y = <int>((pos[i,axis_y]-y_min)*inv_cell_size)
-            index_R = <int>(radius[i]*inv_cell_size) + 1
+            index_x = <int>round((pos[i,axis_x]-x_min)*inv_cell_size - 0.5)
+            index_y = <int>round((pos[i,axis_y]-y_min)*inv_cell_size - 0.5)
+            index_R = <int>round(radius[i]*inv_cell_size - 0.5) + 1
 
             # do a loop over the cells that contribute in the x-direction
             for ii in range(-index_R, index_R+1):
@@ -966,9 +966,9 @@ cpdef void voronoi_RT_2D(double[:,::1] density, float[:,::1] pos,
             radius2 = radius[i]**2                      #(Mpc/h)^2
 
             # find cell where the particle center is and its radius in cell units
-            index_x = <int>((pos[i,axis_x]-x_min)*inv_cell_size)
-            index_y = <int>((pos[i,axis_y]-y_min)*inv_cell_size)
-            index_R = <int>(radius[i]*inv_cell_size) + 1
+            index_x = <int>round((pos[i,axis_x]-x_min)*inv_cell_size - 0.5)
+            index_y = <int>round((pos[i,axis_y]-y_min)*inv_cell_size - 0.5)
+            index_R = <int>round(radius[i]*inv_cell_size - 0.5) + 1
 
             # do a loop over the cells that contribute in the x-direction
             for ii in range(-index_R, index_R+1):
@@ -1078,9 +1078,9 @@ cpdef void SPH_NGP(float[:,:,::1] density, float[:,::1] pos,
         Z = pos[i,2]*inv_cell_size;  R = radius[i]*inv_cell_size
 
         for j in range(points_sph_sphere):
-            index_x = <int>(0.5 + (X + R*sph_points[j,0]))
-            index_y = <int>(0.5 + (Y + R*sph_points[j,1]))
-            index_z = <int>(0.5 + (Z + R*sph_points[j,2]))
+            index_x = <int>round(-0.5 + (X + R*sph_points[j,0]))
+            index_y = <int>round(-0.5 + (Y + R*sph_points[j,1]))
+            index_z = <int>round(-0.5 + (Z + R*sph_points[j,2]))
             index_x = (index_x+dims)%dims
             index_y = (index_y+dims)%dims
             index_z = (index_z+dims)%dims
@@ -1142,9 +1142,9 @@ cpdef void SPH_NGPW(float[:,:,::1] density, float[:,::1] pos,
         weight = W[i]
 
         for j in range(points_sph_sphere):
-            index_x = <int>(0.5 + (X + R*sph_points[j,0]))
-            index_y = <int>(0.5 + (Y + R*sph_points[j,1]))
-            index_z = <int>(0.5 + (Z + R*sph_points[j,2]))
+            index_x = <int>round(-0.5 + (X + R*sph_points[j,0]))
+            index_y = <int>round(-0.5 + (Y + R*sph_points[j,1]))
+            index_z = <int>round(-0.5 + (Z + R*sph_points[j,2]))
             index_x = (index_x+dims)%dims
             index_y = (index_y+dims)%dims
             index_z = (index_z+dims)%dims
@@ -1237,9 +1237,9 @@ cpdef void SPH_RT_2D(double[:,::1] density, float[:,::1] pos,
             mass_part = mass[i]
 
             # find cell where the particle center is and its radius in cell units
-            index_x = <int>((pos[i,axis_x]-x_min)*inv_cell_size)
-            index_y = <int>((pos[i,axis_y]-y_min)*inv_cell_size)
-            index_R = <int>(radius[i]*inv_cell_size) + 1
+            index_x = <int>round((pos[i,axis_x]-x_min)*inv_cell_size - 0.5)
+            index_y = <int>round((pos[i,axis_y]-y_min)*inv_cell_size - 0.5)
+            index_R = <int>round(radius[i]*inv_cell_size - 0.5) + 1
 
             # do a loop over the cells that contribute in the x-direction
             for ii in range(-index_R, index_R+1):
@@ -1267,9 +1267,9 @@ cpdef void SPH_RT_2D(double[:,::1] density, float[:,::1] pos,
             mass_part = mass[i]
 
             # find cell where the particle center is and its radius in cell units
-            index_x = <int>((pos[i,axis_x]-x_min)*inv_cell_size)
-            index_y = <int>((pos[i,axis_y]-y_min)*inv_cell_size)
-            index_R = <int>(radius[i]*inv_cell_size) + 1
+            index_x = <int>round((pos[i,axis_x]-x_min)*inv_cell_size - 0.5)
+            index_y = <int>round((pos[i,axis_y]-y_min)*inv_cell_size - 0.5)
+            index_R = <int>round(radius[i]*inv_cell_size - 0.5) + 1
 
             # do a loop over the cells that contribute in the x-direction
             for ii in range(-index_R, index_R+1):
