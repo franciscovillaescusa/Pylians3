@@ -1,7 +1,7 @@
 **********
 Bispectrum
 **********
-
+ 
 Pylians can compute bispectra of 3D density fields (total matter, CDM, gas, halos, galaxies...etc). The ingredients needed are:
 
 - ``delta``. This is the density contrast field. It should be a 3 dimensional float numpy array such ``delta = np.zeros((grid, grid, grid), dtype=np.float32)``. See :ref:`density_fields` on how to compute  density fields using Pylians.
