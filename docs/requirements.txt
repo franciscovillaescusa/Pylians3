@@ -1,3 +1,8 @@
 sphinx>=5.1.1
-sphinx-tabs
 pygments>=2.13.0
+sphinx-tabs
+nbsphinx==0.8.9
+sphinx_gallery==0.8.2
+urllib3
+pyOpenSSL
+sphinx_rtd_theme
