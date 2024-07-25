@@ -345,6 +345,7 @@ def read_block(filename, block, parttype=-1, physical_velocities=True,
       if block=="ID  ":
         if blocksize == np.dtype(dt).itemsize*curpartnum * 2:
           dt = np.uint64 
+          data = data.astype(dt)
         
     if np.dtype(dt).itemsize*curpartnum != blocksize:
       print("something wrong with blocksize! expected =",np.dtype(dt).itemsize*curpartnum,"actual =",blocksize)
