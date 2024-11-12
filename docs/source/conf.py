@@ -34,7 +34,11 @@ release = '1.0'
 extensions = [
     "sphinx_rtd_theme",
     "sphinx_tabs.tabs",
+    "sphinxcontrib.googleanalytics"
 ]
+
+googleanalytics_id = 'G-XRRM15GMS9'
+googleanalytics_enabled = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

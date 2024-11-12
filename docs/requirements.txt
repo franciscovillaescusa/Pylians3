@@ -6,3 +6,4 @@ sphinx_gallery==0.8.2
 urllib3
 pyOpenSSL
 sphinx_rtd_theme
+sphinxcontrib-googleanalytics
