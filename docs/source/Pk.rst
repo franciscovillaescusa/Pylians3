@@ -291,7 +291,46 @@ An example on how to use this routine is this:
    # Pk_tt will be the momentum auto-power spectrum, defined as above, and with units of (km/s)^2*(Mpc/h)^3 in units of velocity field are (km/s)
    # Pk_dt will be the density-momentum cross-power spectrum with (km/s)*(Mpc/h)^3 units if velocity field has (km/s) units
    k, Pk_dd, Pk_tt, Pk_dt, Nmodes = PKL.XPk_dv(delta, Vx, Vy, Vz, BoxSize, axis, MAS, threads)
+
+Momentum cross-power spectrum
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Given two density fields and velocity catalogs, compute the auto and cross power of the divergences of the momentum fields. Pylians provides the routine ``XPk_vv`` that computes  :math:`P_{\tilde{\theta_1}\tilde{\theta_1}}`,  :math:`P_{\tilde{\theta_2}\tilde{\theta_2}}`, and :math:`P_{\tilde{\theta_1}\tilde{\theta_2}}`, where :math:`\tilde{\theta}=\vec{\nabla}\cdot(1+\delta)\vec{V}`. The arguments of the function are these:
+
+- ``delta1``. A 3D numpy float32 array containing the value of the density constrast in each voxel for field 1.
+- ``Vx1``. A 3D numpy float32 array containing the x component of the 3D velocity field for field 1, e.g. ``Vx = np.zeros((128,128,128), dtype=np.float32)``.
+- ``Vy1``. A 3D numpy float32 array containing the y component of the 3D velocity field for field 1.
+- ``Vz1``. A 3D numpy float32 array containing the z component of the 3D velocity field for field 1.
+- ``delta2``. A 3D numpy float32 array containing the value of the density constrast in each voxel for field 2.
+- ``Vx2``. A 3D numpy float32 array containing the x component of the 3D velocity field for field 2, e.g. ``Vx = np.zeros((128,128,128), dtype=np.float32)``.
+- ``Vy2``. A 3D numpy float32 array containing the y component of the 3D velocity field for field 2.
+- ``Vz2``. A 3D numpy float32 array containing the z component of the 3D velocity field for field 2.
+- ``BoxSize``. The size of the simulation box. Units here will determine units of output.
+  - ``axis``. Axis along which compute the quadrupole, hexadecapole for the theta Pk. If the velocities are in real-space set ``axis=0``. If the velocities are in redshift-space set ``axis=0``, ``axis=1`` or ``axis=2`` if the redshift-space distortions have been placed along the x-axis, y-axis or z-axis, respectively. 
+- ``MAS``. Mass-assignment scheme used to generate the velocity field, if any. Possible options are ``'NGP'``, ``'CIC'``, ``'TSC'``, ``'PCS'``.  If the velocity field has not been generated with any of these set it to ``'None'``. This is used to correct for the MAS when computing the power spectrum.
+- ``threads``. Number of openmp threads to be used.
+
+An example on how to use this routine is this:
+
+.. code-block:: python
+
+   import numpy as np
+   import Pk_library as PKL
+
+   # parameters
+   BoxSize  = 1000.0  #Mpc/h
+   axis     = 0       #no RSD
+   MAS      = 'CIC'   #it assumes the density constrast and velocities have been generated with the same MAS
+   threads  = 2       #number of openmp threads
+
+   # compute the momentum auto- and cross-power spectra
+   # k will have units of h/Mpc
+   # Pk_11 will be the momentum auto-power spectrum for field 1, defined as above, and with units of (km/s)^2*(Mpc/h)^3 in units of velocity field are (km/s)
+   # Pk_22 will be the momentum auto-power spectrum for field 2, defined as above, and with units of (km/s)^2*(Mpc/h)^3 in units of velocity field are (km/s)
+   # Pk_12 will be the momentum cross-power spectrum, defined as above, and with units of (km/s)^2*(Mpc/h)^3 in units of velocity field are (km/s)
+   k, Pk_11, Pk_22, Pk_12, Nmodes = PKL.XPk_vv(delta1, Vx1, Vy1, Vz1, delta2, Vx2, Vy2, Vz2, BoxSize, axis, MAS, threads)
    
+Credit: Adrian Bayer
 
 Binned power spectrum
 ~~~~~~~~~~~~~~~~~~~~~
