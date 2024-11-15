@@ -34,11 +34,14 @@ release = '1.0'
 extensions = [
     "sphinx_rtd_theme",
     "sphinx_tabs.tabs",
-    "sphinxcontrib.googleanalytics"
+    "sphinxcontrib.googleanalytics",
+    "sphinx_sitemap"
 ]
 
 googleanalytics_id = 'G-XRRM15GMS9'
 googleanalytics_enabled = True
+
+html_baseurl = 'https://pylians3.readthedocs.io/en/master/index.html'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -70,3 +73,5 @@ html_theme_options = {
     'logo_only': True,
     'display_version': False,
 }
+
+html_extra_path = ["robots.txt"]

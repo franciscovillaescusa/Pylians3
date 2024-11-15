@@ -7,3 +7,4 @@ urllib3
 pyOpenSSL
 sphinx_rtd_theme
 sphinxcontrib-googleanalytics
+sphinx_sitemap
