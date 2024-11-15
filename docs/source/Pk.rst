@@ -293,7 +293,7 @@ An example on how to use this routine is this:
    k, Pk_dd, Pk_tt, Pk_dt, Nmodes = PKL.XPk_dv(delta, Vx, Vy, Vz, BoxSize, axis, MAS, threads)
 
 Momentum cross-power spectrum
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Given two density fields and velocity catalogs, compute the auto and cross power of the divergences of the momentum fields. Pylians provides the routine ``XPk_vv`` that computes  :math:`P_{\tilde{\theta_1}\tilde{\theta_1}}`,  :math:`P_{\tilde{\theta_2}\tilde{\theta_2}}`, and :math:`P_{\tilde{\theta_1}\tilde{\theta_2}}`, where :math:`\tilde{\theta}=\vec{\nabla}\cdot(1+\delta)\vec{V}`. The arguments of the function are these:
 

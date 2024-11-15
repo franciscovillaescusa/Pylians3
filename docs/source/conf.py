@@ -41,7 +41,7 @@ extensions = [
 googleanalytics_id = 'G-XRRM15GMS9'
 googleanalytics_enabled = True
 
-html_baseurl = 'https://pylians3.readthedocs.io/en/master/index.html'
+html_baseurl = 'https://pylians3.readthedocs.io/en/master/'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
