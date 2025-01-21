@@ -1201,7 +1201,7 @@ class XPk_plane:
                  #########################################
 
          print('Time loop = %.2f'%(time.time()-start2))
-         fact = (BoxSize/grid**2)**3
+         fact = (BoxSize/grid**2)**2
 
          # Pk2D. Check modes, discard DC mode bin and give units
          # we need to multiply the multipoles by (2*ell + 1)
