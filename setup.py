@@ -1,5 +1,4 @@
 from platform import machine, system
-
 import numpy
 from Cython.Build import cythonize
 from setuptools import Extension, find_packages, setup
@@ -10,11 +9,20 @@ is_arm = machine() == "arm64"
 is_m1 = is_mac and is_arm
 
 arch_flag = "-mcpu=apple-m1" if is_m1 else "-march=native"
-omp_flag = "-Xpreprocessor -fopenmp" if is_m1 else "-fopenmp"
+
+# For macOS, pass OpenMP flags as separate arguments.
+if is_mac:
+    omp_compile_args = ["-Xpreprocessor", "-fopenmp"]
+    omp_link_args = ["-lomp"]
+else:
+    omp_compile_args = ["-fopenmp"]
+    omp_link_args = []
 extra_compile_args = ["-O3", "-ffast-math"]
-extra_compile_args_omp = extra_compile_args.copy()
-extra_compile_args_omp.append(omp_flag)
-extra_link_args = [omp_flag]
+extra_compile_args_omp = extra_compile_args + omp_compile_args
+
+# Use OpenMP link flags on macOS.
+extra_link_args = omp_link_args
+
 
 ext_modules = [
     Extension(
@@ -30,10 +38,12 @@ ext_modules = [
         extra_compile_args=extra_compile_args_omp,
     ),
     Extension(
-        "Pk_library.bispectrum_library", ["library/Pk_library/bispectrum_library.pyx"]
+        "Pk_library.bispectrum_library",
+        ["library/Pk_library/bispectrum_library.pyx"]
     ),
     Extension(
-        "MAS_library.field_properties", ["library/MAS_library/field_properties.pyx"]
+        "MAS_library.field_properties",
+        ["library/MAS_library/field_properties.pyx"]
     ),
     Extension(
         "redshift_space_library.redshift_space_library",
@@ -81,7 +91,6 @@ ext_modules = [
     ),
 ]
 
-
 with open("README.md", "r") as f:
     documentation = f.read()
 
@@ -105,7 +114,7 @@ setup(
             "library/integration_library/",
         ],
     ),
-    include_dirs=[numpy.get_include()],
+    include_dirs=[numpy.get_include(), "/usr/local/include"],
     install_requires=[
         "h5py",
         "pyfftw; platform_system!='Darwin' and platform_machine!='arm64'",

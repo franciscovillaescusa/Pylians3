@@ -7,13 +7,13 @@ from libc.math cimport sqrt,pow,sin,cos,floor,fabs,log10
 
 ############### example 1 ################
 cdef void example(double x, double y[], double dydx[],
-                   double a[], double b[], long elements):
+                   double a[], double b[], long elements) noexcept:
     dydx[0] = x*x + 2.0*x + 3.0
 ##########################################
 
 ############### example 2 ################
 cdef void example2(double x, double y[], double dydx[],
-                   double a[], double b[], long elements):
+                   double a[], double b[], long elements) noexcept:
 
     cdef int index
     cdef double a_interp
@@ -30,7 +30,7 @@ cdef void example2(double x, double y[], double dydx[],
 @cython.wraparound(False)
 @cython.cdivision(True) 
 cdef void linear(double x, double y[], double dydx[],
-                 double a[], double b[], long elements):
+                 double a[], double b[], long elements) noexcept:
 
     cdef int index
     cdef double b_interp
@@ -47,7 +47,7 @@ cdef void linear(double x, double y[], double dydx[],
 @cython.wraparound(False)
 @cython.cdivision(True) 
 cdef void sigma(double x, double y[], double dydx[],
-                double a[], double b[], long elements):
+                double a[], double b[], long elements) noexcept:
 
     # a is the input log10(k)
     # b is the input log10(Pk)
