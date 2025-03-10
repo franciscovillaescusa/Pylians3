@@ -30,7 +30,7 @@ ext_modules = [
         ["library/MAS_library/MAS_library.pyx", "library/MAS_library/MAS_c.c"],
         extra_compile_args=extra_compile_args_omp,
         extra_link_args=extra_link_args,
-        libraries=["m"],
+        libraries=[],
     ),
     Extension(
         "Pk_library.Pk_library",
@@ -54,7 +54,7 @@ ext_modules = [
         ["library/smoothing_library/smoothing_library.pyx"],
         extra_compile_args=extra_compile_args_omp,
         extra_link_args=extra_link_args,
-        libraries=["m"],
+        libraries=[],
     ),
     Extension(
         "void_library.void_library",
@@ -64,7 +64,7 @@ ext_modules = [
         ],
         extra_compile_args=extra_compile_args_omp,
         extra_link_args=extra_link_args,
-        libraries=["m"],
+        libraries=[],
     ),
     Extension(
         "integration_library.integration_library",
