@@ -121,6 +121,7 @@ setup(
         "scipy",
         "hdf5plugin",
         "Cython<3.0.0",
+        "tables",
     ],
     package_dir={"": "library/"},
     py_modules=[
