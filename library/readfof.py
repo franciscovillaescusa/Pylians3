@@ -26,7 +26,7 @@ from struct import unpack
 
 class FoF_catalog:
     def __init__(self, basedir, snapnum, long_ids=False, swap=False,
-                 SFR=False, read_IDs=True, prefix='/groups_'):
+                 SFR=False, read_IDs=True, read_type=False, prefix='/groups_'):
 
         if long_ids:  format = np.uint64
         else:         format = np.uint32
@@ -56,6 +56,7 @@ class FoF_catalog:
                 self.GroupTLen   = np.empty(TNG, dtype=dt2)
                 self.GroupTMass  = np.empty(TNG, dtype=dt2)
                 if SFR:  self.GroupSFR = np.empty(TNG, dtype=np.float32)
+                if read_type:  self.GroupType = np.empty(TNG, dtype=np.uint32)
                     
             if NG>0:
                 locs=slice(skip,skip+NG)
@@ -68,6 +69,8 @@ class FoF_catalog:
                 self.GroupTMass[locs]  = np.fromfile(f,dtype=dt2,count=NG)
                 if SFR:
                     self.GroupSFR[locs]=np.fromfile(f,dtype=np.float32,count=NG)
+                if read_type:
+                    self.GroupType[locs]=np.fromfile(f,dtype=np.uint32,count=NG)
                 skip+=NG
 
                 if swap:
@@ -79,6 +82,7 @@ class FoF_catalog:
                     self.GroupTLen.byteswap(True)
                     self.GroupTMass.byteswap(True)
                     if SFR:  self.GroupSFR.byteswap(True)
+                    if read_type:  self.GroupType.byteswap(True)
                         
             curpos = f.tell()
             f.seek(0,os.SEEK_END)
@@ -143,6 +147,8 @@ def writeFoFCatalog(fc, tabFile, idsFile=None):
     fc.GroupTMass.tofile(f)
     if hasattr(fc, 'GroupSFR'):
         fc.GroupSFR.tofile(f)
+    if hasattr(fc, 'GroupType'):
+        fc.GroupType.tofile(f)
     f.close()
 
     if idsFile:
