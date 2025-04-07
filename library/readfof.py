@@ -26,7 +26,7 @@ from struct import unpack
 
 class FoF_catalog:
     def __init__(self, basedir, snapnum, long_ids=False, swap=False,
-                 SFR=False, read_IDs=True, read_type=False, prefix='/groups_'):
+                 SFR=False, read_IDs=True, prefix='/groups_', read_type=False):
 
         if long_ids:  format = np.uint64
         else:         format = np.uint32
