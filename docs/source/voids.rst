@@ -34,7 +34,7 @@ The void finder routine works as follows:
    void_radius = V.void_radius #radius of the voids
    VSF_R       = V.Rbins       #bins in radius for VSF(void size function)
    VSF         = V.void_vsf    #VSF (#voids/volume/dR)
-   if void_field:  void_field  = V.void_field
+   if void_field:  void_field  = V.in_void
 
 ----
 
