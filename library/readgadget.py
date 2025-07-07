@@ -31,6 +31,11 @@ class header:
             self.redshift = f['Header'].attrs[u'Redshift']
             self.npart    = (f['Header'].attrs[u'NumPart_ThisFile']).astype(np.int64)
             self.nall     = (f['Header'].attrs[u'NumPart_Total']).astype(np.int64)
+            try:
+                self.nhigh = (f['Header'].attrs[u'NumPart_Total_HighWord']).astype(np.int64)
+                self.nall += (self.nhigh << np.int64(32))
+            except KeyError:
+                pass
             self.filenum  = int(f['Header'].attrs[u'NumFilesPerSnapshot'])
             self.massarr  = f['Header'].attrs[u'MassTable']
             self.boxsize  = f['Header'].attrs[u'BoxSize']
