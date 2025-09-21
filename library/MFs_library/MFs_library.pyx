@@ -91,7 +91,7 @@ class MFs:
    
         #calculate the MFs of slices and add up 
         for i in range(dims_x):
-            MFs3D_slice,vol_slice = Minkowski_slice(delta[i:i+2,:,:].astype(np.float32),thresholds,thres_mask)
+            MFs3D_slice,vol_slice = Minkowski_slice(delta[i:i+2,:,:].astype(np.float32),thresholds.astype(np.float32),thres_mask)
             MFs3D += MFs3D_slice
             vol   += vol_slice
         
