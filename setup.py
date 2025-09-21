@@ -33,6 +33,11 @@ ext_modules = [
         libraries=["m"],
     ),
     Extension(
+        "MFs_library.MFs_library",
+        ["library/MFs_library/MFs_library.pyx"],
+        extra_compile_args=extra_compile_args_omp,
+    ),
+    Extension(
         "Pk_library.Pk_library",
         ["library/Pk_library/Pk_library.pyx"],
         extra_compile_args=extra_compile_args_omp,
