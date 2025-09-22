@@ -6,10 +6,10 @@ Pylians provides routines to measure the Minkowski functionals (MFs). They chara
 
 The ingredients needed to compute the MFs are:
 
-- ``delta''. The density contrast field.
-- ``CellSize''. Cell size of the density field.
-- ``thres_mask''. Regions with density lower than thres_mask will be excluded in the measurement
-- ``thresholds''. Density threshold above which the excursion set is defined. The MFs will be ouput as a function of the threshold.
+- ``delta``. The density contrast field.
+- ``CellSize``. Cell size of the density field.
+- ``thres_mask``. Regions with density lower than thres_mask will be excluded in the measurement
+- ``thresholds``. Density threshold above which the excursion set is defined. The MFs will be ouput as a function of the threshold.
 
 An example is this
 
