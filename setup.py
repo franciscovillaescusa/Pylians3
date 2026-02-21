@@ -12,6 +12,7 @@ arch_flag = "-mcpu=apple-m1" if is_m1 else "-march=native"
 
 libraries = ["m"]
 
+omp_compile_args = []
 # For macOS, pass OpenMP flags as separate arguments.
 if is_mac:
     omp_compile_args = ["-Xpreprocessor", "-fopenmp"]
