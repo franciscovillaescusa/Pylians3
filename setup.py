@@ -10,14 +10,24 @@ is_m1 = is_mac and is_arm
 
 arch_flag = "-mcpu=apple-m1" if is_m1 else "-march=native"
 
+libraries = ["m"]
+
+omp_compile_args = []
 # For macOS, pass OpenMP flags as separate arguments.
 if is_mac:
     omp_compile_args = ["-Xpreprocessor", "-fopenmp"]
     omp_link_args = ["-lomp"]
+    libraries.append("omp")
 else:
-    omp_compile_args = ["-fopenmp"]
-    omp_link_args = []
+    omp_compilCorrfunce_args = ["-fopenmp"]
+    omp_link_args = ["-fopenmp"] 
+    libraries.append("gomp")
+    
 extra_compile_args = ["-O3", "-ffast-math"]
+
+if not is_mac:   
+    extra_compile_args.append("-march=native")
+
 extra_compile_args_omp = extra_compile_args + omp_compile_args
 
 # Use OpenMP link flags on macOS.
@@ -30,7 +40,7 @@ ext_modules = [
         ["library/MAS_library/MAS_library.pyx", "library/MAS_library/MAS_c.c"],
         extra_compile_args=extra_compile_args_omp,
         extra_link_args=extra_link_args,
-        libraries=["m"],
+        libraries=libraries, 
     ),
     Extension(
         "MFs_library.MFs_library",
@@ -59,7 +69,7 @@ ext_modules = [
         ["library/smoothing_library/smoothing_library.pyx"],
         extra_compile_args=extra_compile_args_omp,
         extra_link_args=extra_link_args,
-        libraries=["m"],
+        libraries=libraries, 
     ),
     Extension(
         "void_library.void_library",
@@ -69,7 +79,7 @@ ext_modules = [
         ],
         extra_compile_args=extra_compile_args_omp,
         extra_link_args=extra_link_args,
-        libraries=["m"],
+        libraries=libraries,  
     ),
     Extension(
         "integration_library.integration_library",
@@ -112,7 +122,9 @@ setup(
     packages=find_packages(where="library/"),
     ext_modules=cythonize(
         ext_modules,
-        compiler_directives={"language_level": "3"},
+        compiler_directives={
+            'legacy_implicit_noexcept': True, 
+            "language_level": "3"},
         include_path=[
             "library/MAS_library/",
             "library/void_library/",
@@ -125,7 +137,7 @@ setup(
         "pyfftw; platform_system!='Darwin' and platform_machine!='arm64'",
         "scipy",
         "hdf5plugin",
-        "Cython<3.0.0",
+        "Cython",
         "tables",
     ],
     package_dir={"": "library/"},
@@ -150,3 +162,4 @@ setup(
         "units_library",
     ],
 )
+
