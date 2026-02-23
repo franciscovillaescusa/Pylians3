@@ -415,7 +415,7 @@ class random_spheres:
 
                 # generate the position and radius of new void
                 pos = np.random.random(3).astype(np.float32)*BoxSize
-                R   = np.random.random(1).astype(np.float32)*(Rmax-Rmin) + Rmin
+                R   = np.random.random(1).astype(np.float32)[0]*(Rmax-Rmin) + Rmin
 
                 for j in range(i):
 
