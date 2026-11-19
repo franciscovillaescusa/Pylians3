@@ -332,6 +332,58 @@ An example on how to use this routine is this:
    
 Credit: Adrian Bayer
 
+Curl power spectrum
+~~~~~~~~~~~~~~~~~~~
+
+Pylians provides the routine ``Pk_curl`` to compute the auto-power spectrum of the curl of a 3D vector field :math:`\vec{q}(\vec{x})` (such as the momentum density field :math:`\vec{q} = (1+\delta)\vec{v}`, a velocity field, or a magnetic field):
+
+.. math::
+
+   \vec{\omega}(\vec{x}) = \vec{\nabla} \times \vec{q}(\vec{x}) \implies \tilde{\vec{\omega}}(\vec{k}) = i\,\vec{k} \times \tilde{\vec{q}}(\vec{k}).
+
+The arguments of the function are these:
+
+- ``qx``: 3D numpy array of type ``float32`` containing the x-component of the vector field, with shape ``(dims, dims, dims)``.
+- ``qy``: 3D numpy array of type ``float32`` containing the y-component of the vector field.
+- ``qz``: 3D numpy array of type ``float32`` containing the z-component of the vector field.
+- ``BoxSize``: Size of the simulation periodic box (float). The units of ``BoxSize`` determine the units of ``k`` and ``Pk``.
+- ``MAS``: Mass-assignment scheme used to generate the fields (``'NGP'``, ``'CIC'``, ``'TSC'``, ``'PCS'``, or ``'None'``). Default is ``'CIC'``. Used to deconvolve and correct mode amplitudes.
+- ``threads``: Number of OpenMP threads to use for FFTs. Default is ``1``.
+- ``cross_terms``: Boolean (default ``False``). If ``True``, adds :math:`2(\omega_x\omega_y + \omega_x\omega_z + \omega_y\omega_z)` into the power spectrum accumulator. Useful for debugging and verifying statistical isotropy (where off-diagonal cross-terms vanish on average).
+- ``return_curl``: Boolean (default ``False``). If ``True``, performs an inverse FFT and also returns the real-space curl components :math:`(\omega_x, \omega_y, \omega_z)`.
+
+An example of how to use this routine:
+
+.. code-block:: python
+
+   import numpy as np
+   import Pk_library as PKL
+
+   # Parameters
+   dims    = 256
+   BoxSize = 1000.0  # Mpc/h
+   MAS     = 'CIC'
+   threads = 4
+
+   # Example: 3D vector field components (e.g., momentum q = (1 + delta) * V)
+   qx = np.zeros((dims, dims, dims), dtype=np.float32)
+   qy = np.zeros((dims, dims, dims), dtype=np.float32)
+   qz = np.zeros((dims, dims, dims), dtype=np.float32)
+
+   # 1. Standard usage: compute power spectrum
+   k, Pk, Nmodes = PKL.Pk_curl(qx, qy, qz, BoxSize, MAS=MAS, threads=threads)
+
+   # k: Wavenumbers in units of h/Mpc
+   # Pk: Power spectrum of the curl field in units of [q]^2 * (h/Mpc)^2 * (Mpc/h)^3 = [q]^2 * (Mpc/h)
+   # Nmodes: Number of modes in each k-bin
+
+   # 2. Optional usage: also retrieve the real-space curl field
+   k, Pk, Nmodes, (omegax, omegay, omegaz) = PKL.Pk_curl(
+       qx, qy, qz, BoxSize, MAS=MAS, threads=threads, return_curl=True
+   )
+
+Credit: Vicente Pedreros Aballay
+
 Binned power spectrum
 ~~~~~~~~~~~~~~~~~~~~~
 
