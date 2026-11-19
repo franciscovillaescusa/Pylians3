@@ -1581,6 +1581,136 @@ def XPk_vv(delta1,Vx1,Vy1,Vz1,delta2,Vx2,Vy2,Vz2,BoxSize,axis=2,MAS='CIC',thread
 ################################################################################
 ################################################################################
 
+################################################################################
+################################################################################
+# This function computes the auto-power spectra of a momentum density field
+# curl[q], with q = (1+delta)*V.
+# qx ----------> 3D momentum density field of the x-component: (dims,dims,dims) np array
+# qy ----------> 3D momentum density field of the y-component: (dims,dims,dims) np array
+# qz ----------> 3D momentum density field of the z-component: (dims,dims,dims) np array
+# BoxSize ------> size of the cubic density field
+# MAS ----------> mass assignment scheme used to compute the fields
+#                 needed to correct modes amplitude
+# threads ------> number of threads (OMP) used to make the FFTW
+# cross_terms --> flag for considering off-diagonal terms, default=False.
+# return_curl --> flag for also returning the real space curl of the vector field, default=False.
+#@cython.boundscheck(False)
+#@cython.cdivision(False)
+def Pk_curl(qx,qy,qz,BoxSize,MAS="CIC",threads=1,cross_terms=False,return_curl=False): 
+
+    start = time.time()
+    cdef int kxx,kyy,kzz,kx,ky,kz,dims,middle,k_index,kmax
+    cdef int MAS_index
+    cdef double kmod, prefact
+    cdef double omegax_real,omegay_real,omegaz_real,omegax_imag,omegay_imag,omegaz_imag
+
+    ####### change this for double precision ######
+    cdef float MAS_factor
+    cdef np.ndarray[np.complex64_t,ndim=3] delta_k,qx_k,qy_k,qz_k
+    ###############################################
+    cdef np.ndarray[np.float64_t, ndim=1] k,Pk,Nmodes,MAS_corr
+    
+    # find dimensions of delta: we are assuming is a (dims,dims,dims) array
+    # determine the different frequencies, the MAS_index and MAS_corr
+    print('Computing power spectra of the fields...')
+    dims   = qx.shape[0];  middle = dims//2
+    kF,kN,kmax_par,kmax_per,kmax = frequencies(BoxSize, dims)
+    MAS_index = MAS_function(MAS)
+    MAS_corr  = np.zeros(3, dtype=np.float64)
+
+    ## compute FFT of the field (change this for double precision) ##
+    qx_k    = FFT3Dr_f(qx,threads)
+    qy_k    = FFT3Dr_f(qy,threads)
+    qz_k    = FFT3Dr_f(qz,threads)
+    #################################
+
+    # define arrays containing k, Pk0,Pk2,Pk4 and Nmodes. We need kmax+1
+    # bins since the mode (middle,middle, middle) has an index = kmax
+    k      = np.zeros(kmax+1, dtype=np.float64)
+    Pk     = np.zeros(kmax+1, dtype=np.float64)
+    Nmodes = np.zeros(kmax+1, dtype=np.float64)
+
+    # define arrays for curl field in Fourier space
+    cdef np.ndarray[np.complex64_t, ndim=3] omegax_k, omegay_k, omegaz_k
+    if return_curl:
+        omegax_k = np.zeros((dims,dims,middle+1), dtype=np.complex64)
+        omegay_k = np.zeros((dims,dims,middle+1), dtype=np.complex64)
+        omegaz_k = np.zeros((dims,dims,middle+1), dtype=np.complex64)
+
+    # do a loop over all modes, computing their k,Pk. k's are in k_F units
+    start2  = time.time(); prefact = np.pi / dims
+    for kxx in range(dims):
+        kx = (kxx-dims if (kxx>middle) else kxx)
+        MAS_corr[0] = MAS_correction(prefact*kx,MAS_index)
+
+        for kyy in range(dims):
+            ky = (kyy-dims if (kyy>middle) else kyy)
+            MAS_corr[1] = MAS_correction(prefact*ky,MAS_index)
+
+            for kzz in range(middle+1): #kzz=[0,1,..,middle] --> kz>0
+                kz = (kzz-dims if (kzz>middle) else kzz)
+                MAS_corr[2] = MAS_correction(prefact*kz,MAS_index)
+
+                # kz=0 and kz=middle planes are special
+                if kz==0 or (kz==middle and dims%2==0):
+                    if kx<0: continue
+                    elif kx==0 or (kx==middle and dims%2 == 0):
+                        if ky<0.0: continue
+
+                # compute |k| of the mode and its integer part
+                kmod = sqrt(kx*kx + ky*ky + kz*kz)
+                k_index = <int>kmod
+
+                # correct modes amplitude for MAS
+                MAS_factor = MAS_corr[0]*MAS_corr[1]*MAS_corr[2]
+                qx_k[kxx,kyy,kzz]    = qx_k[kxx,kyy,kzz]*MAS_factor
+                qy_k[kxx,kyy,kzz]    = qy_k[kxx,kyy,kzz]*MAS_factor
+                qz_k[kxx,kyy,kzz]    = qz_k[kxx,kyy,kzz]*MAS_factor
+
+                # curl
+                omegax_real = -(ky * qz_k[kxx,kyy,kzz].imag - kz * qy_k[kxx,kyy,kzz].imag)
+                omegay_real = -(kz * qx_k[kxx,kyy,kzz].imag - kx * qz_k[kxx,kyy,kzz].imag)
+                omegaz_real = -(kx * qy_k[kxx,kyy,kzz].imag - ky * qx_k[kxx,kyy,kzz].imag)
+
+                omegax_imag = (ky * qz_k[kxx,kyy,kzz].real - kz * qy_k[kxx,kyy,kzz].real)
+                omegay_imag = (kz * qx_k[kxx,kyy,kzz].real - kx * qz_k[kxx,kyy,kzz].real)
+                omegaz_imag = (kx * qy_k[kxx,kyy,kzz].real - ky * qx_k[kxx,kyy,kzz].real)
+
+                if return_curl:
+                    omegax_k[kxx,kyy,kzz] = omegax_real + 1j*omegax_imag
+                    omegay_k[kxx,kyy,kzz] = omegay_real + 1j*omegay_imag
+                    omegaz_k[kxx,kyy,kzz] = omegaz_real + 1j*omegaz_imag
+
+                k[k_index]   += kmod
+                Pk[k_index]  += (omegax_real*omegax_real + omegax_imag*omegax_imag + \
+                                 omegay_real*omegay_real + omegay_imag*omegay_imag + \
+                                 omegaz_real*omegaz_real + omegaz_imag*omegaz_imag)
+
+                if cross_terms: # for debugging, isotropy holds?
+                    Pk[k_index] += 2*(omegax_real*omegay_real + omegax_imag*omegay_imag +
+                                  omegax_real*omegaz_real + omegax_imag*omegaz_imag +
+                                  omegay_real*omegaz_real + omegay_imag*omegaz_imag)
+                Nmodes[k_index] += 1.0
+    print("Time compute modulus = %.2f" % (time.time() - start2))
+
+    # check modes, discard fundamental frequency bin and give units
+    check_number_modes(Nmodes, dims)
+    k   = k[1:];    Nmodes = Nmodes[1:];   k = (k/Nmodes)*kF
+    Pk = Pk[1:]*(BoxSize/dims**2)**3*kF**2;  Pk *= (1.0/Nmodes)
+
+    print("Time taken = %.2f seconds" % (time.time() - start))
+    if return_curl:
+        # inverse FFT to get real-space curl
+        omegax = IFFT3Dr_f(omegax_k, threads).real.astype(np.float32)
+        omegay = IFFT3Dr_f(omegay_k, threads).real.astype(np.float32)
+        omegaz = IFFT3Dr_f(omegaz_k, threads).real.astype(np.float32)
+        return k, Pk, Nmodes, (omegax, omegay, omegaz)
+
+    return k, Pk, Nmodes
+
+################################################################################
+################################################################################
+
 
 ################################################################################
 ################################################################################
